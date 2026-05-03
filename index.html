@@ -621,6 +621,11 @@ function grcUnlock(){
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
+  <!-- LOGOUT TOP -->
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;border-bottom:1px solid var(--line);margin-bottom:8px;">
+    <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.1em;">GRC</div>
+    <button onclick="grcLogout()" style="font-family:'Space Mono',monospace;font-size:7px;font-weight:700;padding:5px 10px;border-radius:var(--r);border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.06);color:var(--red);cursor:pointer;letter-spacing:.05em;text-transform:uppercase;">🔒 Log Out</button>
+  </div>
   <div class="sb-section">
     <div class="sb-section-lbl">Research</div>
     <button class="sb-btn active" onclick="showPane('markets',this)">
@@ -3370,6 +3375,52 @@ function switchOutreach(id, btn) {
   btn.classList.add('active');
 }
 </script>
+
+<script>
+// ── AUTO LOGOUT — 15 min inactivity ──
+(function(){
+  const TIMEOUT = 15 * 60 * 1000; // 15 minutes
+  let timer;
+  let warningTimer;
+
+  function resetTimer(){
+    clearTimeout(timer);
+    clearTimeout(warningTimer);
+    // Show 1 min warning at 14 minutes
+    warningTimer = setTimeout(()=>{
+      if(sessionStorage.getItem('grc_auth')==='true'){
+        const banner = document.getElementById('grc-timeout-warning');
+        if(banner) banner.style.display='flex';
+      }
+    }, 14 * 60 * 1000);
+    // Auto logout at 15 minutes
+    timer = setTimeout(()=>{
+      if(sessionStorage.getItem('grc_auth')==='true'){
+        sessionStorage.removeItem('grc_auth');
+        location.reload();
+      }
+    }, TIMEOUT);
+  }
+
+  // Reset timer on any user activity
+  ['mousedown','mousemove','keydown','scroll','touchstart','click'].forEach(evt=>{
+    document.addEventListener(evt, ()=>{
+      const banner = document.getElementById('grc-timeout-warning');
+      if(banner) banner.style.display='none';
+      resetTimer();
+    }, true);
+  });
+
+  // Start timer on load
+  resetTimer();
+})();
+</script>
+
+<!-- TIMEOUT WARNING BANNER -->
+<div id="grc-timeout-warning" style="display:none;position:fixed;bottom:20px;right:20px;z-index:9998;background:#1a1e28;border:1px solid rgba(245,158,11,.4);border-radius:8px;padding:14px 18px;font-family:'Space Mono',monospace;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,.4);">
+  <span style="font-size:10px;color:var(--amber);">⚠ Session expiring in 1 minute</span>
+  <button onclick="document.getElementById('grc-timeout-warning').style.display='none'" style="font-size:7px;padding:4px 10px;border-radius:4px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.1);color:var(--amber);cursor:pointer;font-family:'Space Mono',monospace;">Stay Logged In</button>
+</div>
 </body>
 </html>
 "
@@ -4423,7 +4474,10 @@ function searchBrokers(v){ brokerSearch=v.toLowerCase(); renderBrokers(); }
 /* ── BROKER STORAGE ── */
 let customBrokers=[];
 try{customBrokers=JSON.parse(localStorage.getItem('grc-v2-brokers')||'[]');}catch(e){}
-function saveBrokers(){try{localStorage.setItem('grc-v2-brokers',JSON.stringify(customBrokers));}catch(e){}}
+function saveBrokers(){try{localStorage.setItem('grc-v2-brokers',JSON.stringify(customBrokers));}catch(e){}
+  // Sync to Render database
+  customBrokers.filter(b=>!b.deleted).forEach(b=>{ if(typeof syncDirectoryToServer==='function') syncDirectoryToServer(b).catch(()=>{}); });
+}
 
 function getAllBrokers(){
   const all=[...BROKERS.map(b=>({...b,monitored:b.monitored!==false,source:'system'}))];
@@ -5170,7 +5224,10 @@ const DT_STAGES=['reviewing','underwriting','loi','hot','passed'];
 const DT_STAGE_LABELS={reviewing:'Reviewing',underwriting:'Underwriting',loi:'LOI Ready',hot:'🔥 Hot',passed:'Passed'};
 const DT_STAGE_COLORS={reviewing:'#60a5fa',underwriting:'#f59e0b',loi:'#2dd4bf',hot:'#ef4444',passed:'#6b7280'};
 let dtDeals=[];try{dtDeals=JSON.parse(localStorage.getItem('grc-v2-dt')||'[]');}catch(e){}
-function dtSave(){try{localStorage.setItem('grc-v2-dt',JSON.stringify(dtDeals));}catch(e){}}
+function dtSave(){try{localStorage.setItem('grc-v2-dt',JSON.stringify(dtDeals));}catch(e){}
+  // Sync deals to Render
+  if(typeof dtDeals!=='undefined') dtDeals.forEach(d=>{ if(typeof syncDealToServer==='function') syncDealToServer(d).catch(()=>{}); });
+}
 let dtCurrentFilter='all',dtCurrentSearch='',dtOpenDealId=null;
 function dtScoreBuyBox(d){
   let score=0,max=0,flags=[];
@@ -6814,6 +6871,12 @@ Do you have a few minutes, or is there a better time this week to connect?"`,
 let biActiveId = null;
 let biActiveOutreachTab = 'email';
 
+function grcLogout(){
+  if(!confirm('Lock the GRC system? You will need to enter the access code to get back in.')) return;
+  sessionStorage.removeItem('grc_auth');
+  location.reload();
+}
+
 function biMainTab(tab){
   const isReport=tab==='report';
   document.getElementById('bi-panel-report').style.display=isReport?'block':'none';
@@ -7090,7 +7153,242 @@ window.addEventListener('message', function(e){
 });
 
 
+/* ══════════════════════════════════════════════════
+   GRC SHARED DATA SYNC — Render Database
+   All data syncs between Gabriel & Javier in real time
+══════════════════════════════════════════════════ */
+
+async function apiCall(method, path, data) {
+  try {
+    const opts = {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+    };
+    if (data && method !== 'GET') opts.body = JSON.stringify(data);
+    const res = await fetch(RENDER_API + path, opts);
+    return await res.json();
+  } catch(e) {
+    console.error('API error:', e.message);
+    return null;
+  }
+}
+
+/* ── BROKER DIRECTORY SYNC ── */
+async function syncDirectoryToServer(broker) {
+  await apiCall('POST', '/directory', {
+    id: broker.id || 'dir_' + Date.now(),
+    name: broker.name,
+    email: broker.email || '',
+    firm: broker.firm || '',
+    firmCat: broker.firmCat || 'other',
+    phone: broker.phone || '',
+    specialty: broker.specialty || '',
+    markets: broker.markets || [],
+    monitored: broker.monitored !== false,
+    source: broker.source || 'custom'
+  });
+}
+
+async function loadDirectoryFromServer() {
+  const data = await apiCall('GET', '/directory');
+  if (!data || !Array.isArray(data)) return;
+  // Merge server data into customBrokers
+  data.forEach(b => {
+    const exists = customBrokers.find(c => c.email && b.email && c.email.toLowerCase() === b.email.toLowerCase());
+    if (!exists) {
+      customBrokers.push({
+        id: b.id, name: b.name, email: b.email, firm: b.firm,
+        firmCat: b.firm_cat, phone: b.phone, specialty: b.specialty,
+        markets: b.markets || [], monitored: b.monitored, source: 'custom'
+      });
+    }
+  });
+  saveBrokers();
+  renderBrokers();
+}
+
+/* ── DEAL TRACKER SYNC ── */
+async function syncDealToServer(deal) {
+  await apiCall('POST', '/deals', {
+    id: deal.id,
+    name: deal.name || deal.propName || '',
+    address: deal.address || '',
+    market: deal.market || 'FL',
+    units: deal.units || 0,
+    price: deal.price || deal.askPrice || 0,
+    pricePerUnit: deal.pricePerUnit || deal.ppu || 0,
+    yearBuilt: deal.yearBuilt || deal.yrBuilt || 0,
+    capRate: deal.capRate || deal.goingInCap || 0,
+    status: deal.status || 'screening',
+    assetClass: deal.assetClass || deal.cls || 'B',
+    brokerName: deal.brokerName || deal.broker || '',
+    brokerEmail: deal.brokerEmail || '',
+    notes: deal.notes || ''
+  });
+}
+
+async function loadDealsFromServer() {
+  const data = await apiCall('GET', '/deals');
+  if (!data || !Array.isArray(data)) return;
+  // Merge into local deals array
+  if (typeof dtDeals !== 'undefined') {
+    data.forEach(d => {
+      const exists = dtDeals.find(x => x.id === d.id);
+      if (!exists) {
+        dtDeals.push({
+          id: d.id, propName: d.name, address: d.address,
+          market: d.market, units: d.units, askPrice: d.price,
+          ppu: d.price_per_unit, yrBuilt: d.year_built,
+          goingInCap: d.cap_rate, status: d.status,
+          cls: d.asset_class, broker: d.broker_name,
+          brokerEmail: d.broker_email, notes: d.notes,
+          added: d.added_date
+        });
+      }
+    });
+    localStorage.setItem('grc_dt_deals', JSON.stringify(dtDeals));
+    dtRenderDashboard();
+  }
+}
+
+/* ── COMP SALES SYNC ── */
+async function syncCompToServer(comp) {
+  await apiCall('POST', '/comps', {
+    id: comp.id,
+    propertyName: comp.name || '',
+    address: comp.address || '',
+    market: comp.market || 'FL',
+    units: comp.units || 0,
+    salePrice: comp.price || 0,
+    pricePerUnit: comp.ppu || 0,
+    capRate: comp.cap || 0,
+    yearBuilt: comp.yr || 0,
+    saleDate: comp.date || null,
+    notes: comp.notes || ''
+  });
+}
+
+async function loadCompsFromServer() {
+  const data = await apiCall('GET', '/comps');
+  if (!data || !Array.isArray(data)) return;
+  if (typeof comps !== 'undefined') {
+    data.forEach(c => {
+      const exists = comps.find(x => x.id === c.id);
+      if (!exists) {
+        comps.push({
+          id: c.id, name: c.property_name, address: c.address,
+          market: c.market, units: c.units, price: c.sale_price,
+          ppu: c.price_per_unit, cap: c.cap_rate, yr: c.year_built,
+          date: c.sale_date, notes: c.notes
+        });
+      }
+    });
+    saveComps();
+    renderComps();
+  }
+}
+
+/* ── INSURANCE SYNC ── */
+async function syncInsuranceToServer(ins) {
+  await apiCall('POST', '/insurance', {
+    id: ins.id,
+    propertyName: ins.name || '',
+    market: ins.market || 'FL',
+    units: ins.units || 0,
+    carrier: ins.carrier || '',
+    annualPremium: ins.premium || 0,
+    perUnit: ins.perUnit || 0,
+    coverageAmount: ins.coverage || 0,
+    deductible: ins.deductible || 0,
+    expiryDate: ins.expiry || null,
+    notes: ins.notes || ''
+  });
+}
+
+async function loadInsuranceFromServer() {
+  const data = await apiCall('GET', '/insurance');
+  if (!data || !Array.isArray(data)) return;
+  if (typeof insData !== 'undefined') {
+    data.forEach(i => {
+      const exists = insData.find(x => x.id === i.id);
+      if (!exists) {
+        insData.push({
+          id: i.id, name: i.property_name, market: i.market,
+          units: i.units, carrier: i.carrier, premium: i.annual_premium,
+          perUnit: i.per_unit, coverage: i.coverage_amount,
+          deductible: i.deductible, expiry: i.expiry_date, notes: i.notes
+        });
+      }
+    });
+    saveIns();
+    renderIns();
+  }
+}
+
+/* ── INIT ALL SYNC ── */
+async function initSharedSync() {
+  console.log('🔄 Syncing with GRC database...');
+  await Promise.all([
+    loadDirectoryFromServer(),
+    loadDealsFromServer(),
+    loadCompsFromServer(),
+    loadInsuranceFromServer(),
+  ]);
+  console.log('✓ All data synced');
+}
+
+// Auto-sync every 60 seconds
+setInterval(initSharedSync, 60000);
+
+
+initSharedSync().catch(()=>{});
 biRenderCards();
 </script>
+
+<script>
+// ── AUTO LOGOUT — 15 min inactivity ──
+(function(){
+  const TIMEOUT = 15 * 60 * 1000; // 15 minutes
+  let timer;
+  let warningTimer;
+
+  function resetTimer(){
+    clearTimeout(timer);
+    clearTimeout(warningTimer);
+    // Show 1 min warning at 14 minutes
+    warningTimer = setTimeout(()=>{
+      if(sessionStorage.getItem('grc_auth')==='true'){
+        const banner = document.getElementById('grc-timeout-warning');
+        if(banner) banner.style.display='flex';
+      }
+    }, 14 * 60 * 1000);
+    // Auto logout at 15 minutes
+    timer = setTimeout(()=>{
+      if(sessionStorage.getItem('grc_auth')==='true'){
+        sessionStorage.removeItem('grc_auth');
+        location.reload();
+      }
+    }, TIMEOUT);
+  }
+
+  // Reset timer on any user activity
+  ['mousedown','mousemove','keydown','scroll','touchstart','click'].forEach(evt=>{
+    document.addEventListener(evt, ()=>{
+      const banner = document.getElementById('grc-timeout-warning');
+      if(banner) banner.style.display='none';
+      resetTimer();
+    }, true);
+  });
+
+  // Start timer on load
+  resetTimer();
+})();
+</script>
+
+<!-- TIMEOUT WARNING BANNER -->
+<div id="grc-timeout-warning" style="display:none;position:fixed;bottom:20px;right:20px;z-index:9998;background:#1a1e28;border:1px solid rgba(245,158,11,.4);border-radius:8px;padding:14px 18px;font-family:'Space Mono',monospace;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,.4);">
+  <span style="font-size:10px;color:var(--amber);">⚠ Session expiring in 1 minute</span>
+  <button onclick="document.getElementById('grc-timeout-warning').style.display='none'" style="font-size:7px;padding:4px 10px;border-radius:4px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.1);color:var(--amber);cursor:pointer;font-family:'Space Mono',monospace;">Stay Logged In</button>
+</div>
 </body>
 </html>
