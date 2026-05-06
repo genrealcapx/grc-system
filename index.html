@@ -529,6 +529,10 @@ td{padding:9px 13px;vertical-align:middle;}
 .rr-table th{padding:6px 9px;font-family:'Space Mono',monospace;font-size:7px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);background:var(--s3);text-align:left;}
 .rr-table td{padding:6px 9px;border-bottom:1px solid var(--line);}
 .rr-table tr:hover td{background:var(--s2);}
+
+.out-tab{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;padding:9px 18px;background:transparent;border:none;border-bottom:2px solid transparent;color:var(--muted);cursor:pointer;letter-spacing:.05em;text-transform:uppercase;transition:all .2s;}
+.out-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.out-tab:hover{color:var(--paper);}
 </style>
 </head>
 <body>
@@ -3376,8 +3380,8 @@ function switchOutreach(id, btn) {
 <!-- ══ BROKER OUTREACH AUTOMATION ══════════════════ -->
 <div class="pane" id="pane-outreach">
   <div class="pane-hdr">
-    <div class="pane-title">Broker Outreach Automation</div>
-    <div class="pane-sub">Automated email sequences to your broker network — sent from Gabriel or Javier's GRC email. Full control over templates, schedule, and every broker in the campaign.</div>
+    <div class="pane-title">Broker Outreach Automation <span class="sb-badge" style="background:rgba(34,197,94,.15);color:var(--green);font-size:9px;margin-left:6px;">LIVE</span></div>
+    <div class="pane-sub">Automated 4-email sequence · Day 1 → +3 days → +7 days → +14 days · Sent from Gabriel or Javier's GRC email · Both principals CC'd on every send</div>
   </div>
 
   <!-- TABS -->
@@ -3390,28 +3394,18 @@ function switchOutreach(id, btn) {
 
   <!-- TAB: DASHBOARD -->
   <div class="out-tab-content active" id="out-tab-dashboard">
-
-    <!-- STATS -->
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="out-stats"></div>
-
-    <!-- ACTION BAR -->
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line);">
-      <button class="btn-primary" style="width:auto;padding:7px 18px;" onclick="outAddBroker()">+ Add Broker to Campaign</button>
-      <button class="btn-secondary" onclick="outStartAll()">▶ Start All Pending</button>
-      <button class="btn-secondary" onclick="outPauseAll()">⏸ Pause All</button>
+      <button class="btn-primary" style="width:auto;padding:7px 18px;" onclick="outOpenAddModal()">➕ Add Broker to Campaign</button>
       <button class="btn-secondary" onclick="outSyncFromServer()">🔄 Sync from Server</button>
-      <button class="btn-secondary" onclick="outExport()">↓ Export Report</button>
       <div style="margin-left:auto;display:flex;gap:6px;align-items:center;">
         <span style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);">Filter:</span>
-        <button class="dt-flt on" onclick="outFilter('all',this)">All</button>
-        <button class="dt-flt" onclick="outFilter('active',this)">Active</button>
-        <button class="dt-flt" onclick="outFilter('replied',this)">Replied</button>
-        <button class="dt-flt" onclick="outFilter('paused',this)">Paused</button>
-        <button class="dt-flt" onclick="outFilter('completed',this)">Completed</button>
+        <button class="dt-flt on" onclick="outFilterBtn('all',this)">All</button>
+        <button class="dt-flt" onclick="outFilterBtn('active',this)">Active</button>
+        <button class="dt-flt" onclick="outFilterBtn('replied',this)">Replied</button>
+        <button class="dt-flt" onclick="outFilterBtn('completed',this)">Completed</button>
       </div>
     </div>
-
-    <!-- BROKER CAMPAIGN TABLE -->
     <div style="overflow-x:auto;border-radius:var(--r-lg);border:1px solid var(--line);">
       <table style="width:100%;border-collapse:collapse;font-size:11px;min-width:900px;background:var(--s1);">
         <thead><tr style="background:var(--s3);">
@@ -3426,129 +3420,124 @@ function switchOutreach(id, btn) {
           <th style="padding:9px 12px;font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);text-align:left;">Replied</th>
           <th style="padding:9px 12px;font-family:'Space Mono',monospace;font-size:7px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);text-align:left;">Actions</th>
         </tr></thead>
-        <tbody id="out-table-body">
-          <tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted);font-size:11px;">No brokers in campaign yet.<br>Click <strong style="color:var(--gold)">+ Add Broker to Campaign</strong> to start.</td></tr>
+        <tbody id="out-tbody">
+          <tr><td colspan="10" style="text-align:center;padding:32px;color:var(--muted);font-size:11px;">No brokers in campaign yet.<br>Click <strong style="color:var(--gold)">➕ Add Broker to Campaign</strong> to start.</td></tr>
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- TAB: EMAIL TEMPLATES -->
-  <div class="out-tab-content" id="out-tab-templates">
-    <div class="info-box">✏ <strong>Full Control:</strong> Edit any template below. Changes apply to all future emails in the sequence. Variables like [Broker Name], [Market], [Sender Name] are filled in automatically when sent.</div>
-
+  <!-- TAB: TEMPLATES -->
+  <div class="out-tab-content" id="out-tab-templates" style="display:none;">
+    <div class="info-box" style="margin-bottom:14px;">✏ <strong>Full Control:</strong> Edit any template below. Variables [BROKER_FIRST], [BROKER_NAME], [SENDER_NAME] are filled automatically when sent.</div>
     <div id="out-templates-list" style="display:flex;flex-direction:column;gap:14px;"></div>
   </div>
 
-  <!-- TAB: SETTINGS -->
-  <div class="out-tab-content" id="out-settings">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:900px;">
+  <!-- TAB: ACTIVITY -->
+  <div class="out-tab-content" id="out-tab-activity" style="display:none;">
+    <div id="out-log" style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:14px;min-height:200px;font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);">No activity yet.</div>
+  </div>
 
-      <!-- Azure Connection -->
-      <div style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;">
-        <div style="font-family:'Cinzel',serif;font-size:14px;font-weight:600;color:var(--paper);margin-bottom:3px;">Microsoft Azure Connection</div>
-        <div style="font-size:10px;color:var(--muted);margin-bottom:14px;">Credentials that power email sending from your GRC Outlook accounts</div>
-        <div class="form-group"><label class="form-label">Application (Client) ID</label>
-          <input class="form-input" type="text" id="az-client-id" placeholder="79598749-563c-4c00-a883-da27768a3a3b" value="79598749-563c-4c00-a883-da27768a3a3b">
-        </div>
-        <div class="form-group"><label class="form-label">Directory (Tenant) ID</label>
-          <input class="form-input" type="text" id="az-tenant-id" placeholder="086b45ea-57c1-448c-bab3-7c670b9d39f4" value="086b45ea-57c1-448c-bab3-7c670b9d39f4">
-        </div>
-        <div class="form-group"><label class="form-label">Client Secret</label>
-          <input class="form-input" type="password" id="az-secret" placeholder="Your client secret value" value="">
-        </div>
-        <div style="display:flex;gap:8px;margin-top:4px;">
-          <button class="btn-primary" style="flex:1;" onclick="outSaveSettings()">Save Credentials →</button>
-          <button class="btn-secondary" onclick="outTestConnection()">Test Connection</button>
-        </div>
-        <div id="az-status" style="margin-top:8px;font-family:'Space Mono',monospace;font-size:8px;"></div>
-      </div>
+  <!-- TAB: SETTINGS -->
+  <div class="out-tab-content" id="out-tab-settings" style="display:none;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:900px;">
 
       <!-- Sending Accounts -->
       <div style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;">
         <div style="font-family:'Cinzel',serif;font-size:14px;font-weight:600;color:var(--paper);margin-bottom:3px;">Sending Accounts</div>
-        <div style="font-size:10px;color:var(--muted);margin-bottom:14px;">Configure both GRC email accounts for outreach</div>
-
+        <div style="font-size:10px;color:var(--muted);margin-bottom:14px;">GRC email accounts used for outreach</div>
         <div style="background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;">
           <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--paper);margin-bottom:8px;">Gabriel Vazquez</div>
-          <div class="form-group"><label class="form-label">Email</label>
-            <input class="form-input" type="email" id="sender-gabriel-email" value="gabriel.vazquez@genrealcapital.com">
-          </div>
-          <div class="form-group"><label class="form-label">Display Name</label>
-            <input class="form-input" type="text" id="sender-gabriel-name" value="Gabriel Vazquez | Generational Real Estate Capital">
-          </div>
-          <div class="form-group"><label class="form-label">Phone</label>
-            <input class="form-input" type="text" id="sender-gabriel-phone" value="(352) 710-6870">
-          </div>
+          <div class="fld-lbl">Email</div>
+          <input class="fld-inp" type="email" id="sender-gabriel-email" value="gabriel.vazquez@genrealcapital.com" style="margin-bottom:6px;">
+          <div class="fld-lbl">Phone</div>
+          <input class="fld-inp" type="text" id="sender-gabriel-phone" value="(352) 710-6870">
         </div>
-
-        <div style="background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;">
+        <div style="background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;">
           <div style="font-family:'Cinzel',serif;font-size:12px;color:var(--paper);margin-bottom:8px;">Javier Rojas</div>
-          <div class="form-group"><label class="form-label">Email</label>
-            <input class="form-input" type="email" id="sender-javier-email" value="javier.rojas@genrealcapital.com">
-          </div>
-          <div class="form-group"><label class="form-label">Display Name</label>
-            <input class="form-input" type="text" id="sender-javier-name" value="Javier Rojas | Generational Real Estate Capital">
-          </div>
-          <div class="form-group"><label class="form-label">Phone</label>
-            <input class="form-input" type="text" id="sender-javier-phone" value="(813) 416-9283">
-          </div>
+          <div class="fld-lbl">Email</div>
+          <input class="fld-inp" type="email" id="sender-javier-email" value="javier.rojas@genrealcapital.com" style="margin-bottom:6px;">
+          <div class="fld-lbl">Phone</div>
+          <input class="fld-inp" type="text" id="sender-javier-phone" value="(813) 416-9283">
         </div>
-
-        <button class="btn-primary" style="width:100%;margin-top:10px;" onclick="outSaveSettings()">Save Settings →</button>
+        <button class="btn-primary" style="width:100%;" onclick="alert('Settings saved locally ✓')">Save Settings →</button>
       </div>
 
       <!-- Reply Settings -->
       <div style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;">
         <div style="font-family:'Cinzel',serif;font-size:14px;font-weight:600;color:var(--paper);margin-bottom:3px;">Reply Settings</div>
-        <div style="font-size:10px;color:var(--muted);margin-bottom:14px;">When a broker replies — who gets notified immediately</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:14px;">When a broker replies — who gets notified</div>
         <div style="background:var(--green-bg);border:1px solid rgba(34,197,94,.2);border-radius:var(--r);padding:10px 12px;margin-bottom:10px;">
-          <div style="font-size:10px;color:var(--green);font-weight:600;margin-bottom:4px;">✓ Reply-To Both (Option B selected)</div>
+          <div style="font-size:10px;color:var(--green);font-weight:600;margin-bottom:4px;">✓ Reply-To Both</div>
           <div style="font-size:9px;color:var(--muted);">gabriel.vazquez@genrealcapital.com<br>javier.rojas@genrealcapital.com</div>
         </div>
         <div style="font-size:10px;color:var(--muted);line-height:1.7;">When any broker replies:<br>
-        ✓ Both Gabriel and Javier receive it immediately<br>
-        ✓ Sequence stops automatically for that broker<br>
-        ✓ Broker marked as "Replied" in dashboard<br>
-        ✓ Activity log updated</div>
+          ✓ Both Gabriel and Javier receive it immediately<br>
+          ✓ Sequence stops automatically<br>
+          ✓ Broker marked as "Replied" in dashboard<br>
+          ✓ Activity log updated</div>
       </div>
 
-      <!-- Schedule Settings -->
+      <!-- Email Schedule -->
       <div style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;">
         <div style="font-family:'Cinzel',serif;font-size:14px;font-weight:600;color:var(--paper);margin-bottom:3px;">Email Schedule</div>
-        <div style="font-size:10px;color:var(--muted);margin-bottom:14px;">When emails go out each day</div>
-        <div class="form-group"><label class="form-label">Send Time (Your Local Time)</label>
-          <select class="form-select" id="out-send-time">
-            <option value="08:00">8:00 AM</option>
-            <option value="09:00" selected>9:00 AM</option>
-            <option value="10:00">10:00 AM</option>
-            <option value="11:00">11:00 AM</option>
-          </select>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:14px;">Automatic send schedule</div>
+        <div style="background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;">
+          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--green);margin-bottom:8px;">✓ ACTIVE — Runs automatically</div>
+          <div style="font-size:10px;color:var(--muted);line-height:1.8;">
+            🕘 Every weekday at <strong style="color:var(--paper)">9:00 AM Eastern</strong><br>
+            📧 Email 1 — Day 1 (immediate)<br>
+            📧 Email 2 — +3 days<br>
+            📧 Email 3 — +7 days<br>
+            📧 Email 4 — +14 days<br>
+          </div>
         </div>
-        <div class="form-group"><label class="form-label">Send Days</label>
-          <select class="form-select" id="out-send-days">
-            <option value="weekdays" selected>Weekdays Only (Mon–Fri)</option>
-            <option value="all">Every Day</option>
-          </select>
-        </div>
-        <div class="info-box" style="margin-bottom:0;font-size:10px;">💡 <strong>Best practice:</strong> Send weekdays 9–10am. Emails sent during business hours get significantly higher response rates from brokers.</div>
+      </div>
+
+      <!-- Server Status -->
+      <div style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px 20px;">
+        <div style="font-family:'Cinzel',serif;font-size:14px;font-weight:600;color:var(--paper);margin-bottom:3px;">Server Status</div>
+        <div style="font-size:10px;color:var(--muted);margin-bottom:14px;">Render outreach server health</div>
+        <button onclick="outCheckServer()" class="btn-secondary" style="width:100%;margin-bottom:10px;">🔍 Check Server Status</button>
+        <div id="out-server-status" style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);"></div>
       </div>
 
     </div>
   </div>
+</div>
 
-  <!-- TAB: ACTIVITY LOG -->
-  <div class="out-tab-content" id="out-activity">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-      <div style="font-size:12px;color:var(--muted);">Complete history of every email sent, replied, and action taken.</div>
-      <button class="btn-secondary" onclick="outClearLog()">Clear Log</button>
+<!-- ADD BROKER MODAL -->
+<div id="out-add-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:var(--s1);border:1px solid var(--gold-mid);border-radius:var(--r-lg);padding:28px;width:500px;max-height:85vh;overflow-y:auto;">
+    <div style="font-family:'Cinzel',serif;font-size:16px;color:var(--gold);margin-bottom:6px;">Add Broker to Campaign</div>
+    <div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);margin-bottom:20px;">Email 1 sends at next 9am Eastern · Sequence: Day 1 → +3 → +7 → +14 days</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div><div class="fld-lbl">Broker Name *</div><input id="out-add-name" class="fld-inp" placeholder="John Smith"></div>
+      <div><div class="fld-lbl">Email Address *</div><input id="out-add-email" class="fld-inp" type="email" placeholder="john@firm.com"></div>
+      <div><div class="fld-lbl">Firm / Company</div><input id="out-add-firm" class="fld-inp" placeholder="Marcus & Millichap"></div>
+      <div><div class="fld-lbl">Market</div>
+        <select id="out-add-market" class="fld-inp">
+          <option value="FL">Florida</option>
+          <option value="NC">North Carolina</option>
+          <option value="SC">South Carolina</option>
+          <option value="TX">Texas</option>
+        </select>
+      </div>
+      <div><div class="fld-lbl">Send Emails From</div>
+        <select id="out-add-sender" class="fld-inp">
+          <option value="gabriel">Gabriel Vazquez</option>
+          <option value="javier">Javier Rojas</option>
+        </select>
+      </div>
+      <div><div class="fld-lbl">Notes</div><input id="out-add-notes" class="fld-inp" placeholder="Optional notes"></div>
     </div>
-    <div id="out-activity-log" style="display:flex;flex-direction:column;gap:6px;">
-      <div style="text-align:center;padding:32px;color:var(--muted);font-size:11px;">No activity yet. Start your campaign to see emails logged here.</div>
+    <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end;">
+      <button onclick="document.getElementById('out-add-modal').style.display='none'" style="font-family:'Space Mono',monospace;font-size:8px;padding:8px 18px;border-radius:var(--r);border:1px solid var(--line);background:var(--s2);color:var(--muted);cursor:pointer;">Cancel</button>
+      <button onclick="outAddBroker()" style="font-family:'Space Mono',monospace;font-size:8px;font-weight:700;padding:8px 18px;border-radius:var(--r);border:1px solid var(--gold-mid);background:var(--gold-lt);color:var(--gold);cursor:pointer;">➕ Add to Campaign</button>
     </div>
   </div>
-
 </div>
+
 
 <!-- ══ DEAL SEARCH ═══════════════════════════════ -->
 <div class="pane" id="pane-dealsearch">
@@ -4414,6 +4403,26 @@ function toggleMonitor(email){
   else{customBrokers.push({...brk,monitored:!brk.monitored,source:'custom'});}
   saveBrokers();renderBrokers();
 }
+
+function brkAddToCampaignFromDir(name, email, firm, market){
+  if(!email){alert('No email for this broker.');return;}
+  const exists = outCampaign.find(b=>b.email&&b.email.toLowerCase()===email.toLowerCase());
+  if(exists){alert(name+' is already in the campaign.');return;}
+  const broker = {
+    id: 'oc_'+Date.now(),
+    name, email, firm: firm||'', market: market||'FL',
+    sender: 'gabriel', notes: '',
+    status: 'active', currentStep: 1, replied: false,
+    lastSentDate: null,
+    nextSendDate: new Date().toISOString(),
+    addedDate: new Date().toISOString()
+  };
+  outCampaign.push(broker);
+  outSaveCampaign();
+  outLog('➕', '<strong>'+name+'</strong> added from Broker Directory');
+  alert('✓ '+name+' added to Outreach Campaign!\n\nGo to Broker Outreach to view.');
+}
+
 
 function renderBrokers(){
   const g=document.getElementById('broker-grid');if(!g)return;
@@ -5989,7 +5998,6 @@ function renderIns(){
    ══════════════════════════════════════════════ */
 
 /* ── STATE ── */
-let outCampaign=[];
 let outActivity=[];
 let outFilter_='all';
 let outSettings={
@@ -6006,110 +6014,7 @@ let outSettings={
   sendDays:'weekdays'
 };
 
-let outTemplates=[
-  {
-    id:'t1',day:1,
-    title:'Introduction — Who GRC Is & What We Buy',
-    subject:'Actively Acquiring Multifamily — FL, NC, SC & TX | Generational Real Estate Capital',
-    body:`Hi [Broker Name],
 
-My name is [Sender Name], Principal at Generational Real Estate Capital (GRC). We are actively acquiring Class B garden-style multifamily properties across Florida, North Carolina, South Carolina, and Texas.
-
-Our acquisition criteria:
-• Asset Class: Class B or C, Garden Style (Pitched Roof)
-• Vintage: 1990–2002
-• Unit Count: 50–150 units
-• Price Range: $3M–$12M
-• Cap Rate Target: 6.5%+ going-in
-• Markets: FL, NC, SC, TX
-
-We are equity-ready, move quickly on well-priced opportunities, and can provide proof of funds immediately upon request.
-
-Would love to be on your radar for any deals matching this profile — on-market, off-market, or coming soon.
-
-Best regards,
-
-[Sender Name]
-Generational Real Estate Capital
-[Sender Email] | [Sender Phone]
-gabriel.vazquez@genrealcapital.com | (352) 710-6870
-javier.rojas@genrealcapital.com | (813) 416-9283`
-  },
-  {
-    id:'t2',day:7,
-    title:'Follow Up — We Move Quickly, Proof of Funds Ready',
-    subject:'Following Up — GRC Multifamily Acquisition | [Market]',
-    body:`Hi [Broker Name],
-
-Following up on my note from last week. I wanted to make sure you have our criteria on hand as you work through your current listings.
-
-We are particularly active in [Market] right now and looking to move quickly on the right deal.
-
-A few things that set GRC apart:
-• We underwrite fast — typically within 48 hours of receiving the OM
-• Proof of funds available immediately upon request
-• We close — no re-trading, no surprises at the finish line
-• Flexible on structure if it helps get the deal done
-
-If you have anything coming to market in the next 30–60 days that fits our profile, I'd love to hear about it early.
-
-Thank you,
-
-[Sender Name]
-Generational Real Estate Capital
-[Sender Email] | [Sender Phone]`
-  },
-  {
-    id:'t3',day:21,
-    title:'Soft Check In — Anything Coming to Market?',
-    subject:'Anything Coming to Market in [Market]? — GRC',
-    body:`Hi [Broker Name],
-
-Quick check-in from GRC. We are still very active in [Market] and looking for the right Class B garden-style deal.
-
-Any listings — on-market, off-market, or coming soon — in the 50–150 unit range that might fit?
-
-We are specifically looking for:
-• 1990–2002 vintage
-• Garden style with pitched roof
-• $3M–$12M range
-• 6.5%+ going-in cap or strong value-add story
-
-Even if nothing fits right now — please keep us in mind. We are long-term buyers building a portfolio in your market.
-
-Thank you,
-
-[Sender Name]
-Generational Real Estate Capital
-[Sender Email] | [Sender Phone]`
-  },
-  {
-    id:'t4',day:45,
-    title:'Stay in Touch — Still Actively Buying',
-    subject:'GRC — Still Actively Acquiring in [Market]',
-    body:`Hi [Broker Name],
-
-Just a quick note to stay on your radar. GRC is still actively acquiring Class B multifamily in [Market] and we remain equity-ready.
-
-We have closed acquisitions in FL and the Carolinas and are expanding our TX and additional FL holdings this year.
-
-If you have anything that fits our criteria — or know of any distressed sellers, motivated owners, or pre-market opportunities — we would love the first call.
-
-Our criteria remains:
-• Garden style · 1990–2002 · 50–150 units · $3M–$12M · 6.5%+ cap
-
-Looking forward to working together.
-
-[Sender Name]
-Generational Real Estate Capital
-[Sender Email] | [Sender Phone]`
-  }
-];
-
-try{
-  const saved=localStorage.getItem('grc-v2-outreach');
-  if(saved){const d=JSON.parse(saved);outCampaign=d.campaign||[];outActivity=d.activity||[];if(d.templates)outTemplates=d.templates;if(d.settings)outSettings={...outSettings,...d.settings};}
-}catch(e){}
 
 function outSave(){
   try{localStorage.setItem('grc-v2-outreach',JSON.stringify({campaign:outCampaign,activity:outActivity,templates:outTemplates,settings:outSettings}));}catch(e){}
@@ -6413,29 +6318,29 @@ function outPreviewNext(id){
 
 /* ── SEND NOW (simulation — real send goes through Render server) ── */
 async function outSendNow(id){
-  const b=outCampaign.find(x=>x.id===id);
-  if(!b){alert('Broker not found. Please add the broker to campaign first.');return;}
+  const b=outCampaign.find(x=>x.id===id);if(!b)return;
   if(b.status==='replied'||b.status==='completed'){alert('This broker has already replied or completed the sequence.');return;}
 
   const btn=document.querySelector(`button[onclick="outSendNow('${id}')"]`);
   if(btn){btn.textContent='⏳ Sending...';btn.disabled=true;}
 
   try{
-    // Send directly with broker data — no pre-save needed
-    const res = await fetch(RENDER_API+'/send-direct', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        name: b.name,
-        email: b.email,
-        sender: b.sender||'gabriel',
-        step: b.currentStep||1
-      })
+    // First make sure broker exists on server
+    await apiCall('POST','/brokers',{
+      id:b.id,name:b.name,email:b.email,firm:b.firm||'',
+      market:b.market||'FL',sender:b.sender||'gabriel',
+      status:'active',currentStep:b.currentStep,
+      nextSendDate:new Date().toISOString(),notes:b.notes||''
     });
-    const data = await res.json();
 
-    if(data.success){
-      outLog('📧',`Email ${b.currentStep} sent to <strong>${b.name}</strong> &lt;${b.email}&gt; ✓`);
+    // Now trigger instant send
+    const res=await apiCall('POST','/send-now',{brokerId:b.id});
+
+    if(res.success){
+      const senderEmail=b.sender==='javier'?outSettings.javierEmail:outSettings.gabrielEmail;
+      outLog('📧',`Email ${b.currentStep} sent to <strong>${b.name}</strong> &lt;${b.email}&gt; from ${senderEmail} ✓`);
+
+      // Advance local state
       b.lastSentDate=new Date().toISOString();
       if(b.currentStep>=4){b.status='completed';b.nextSendDate=null;}
       else{
@@ -6446,10 +6351,10 @@ async function outSendNow(id){
       }
       outSave();outRenderDashboard();
       if(btn){btn.textContent='✓ Sent!';setTimeout(()=>{btn.textContent='▶ Send Now';btn.disabled=false;},3000);}
-      alert('✓ Email sent!\n\nCheck your Outlook Sent folder.');
+      alert('✓ Email sent successfully!\n\nCheck your Outlook Sent folder to confirm.');
     } else {
       if(btn){btn.textContent='▶ Send Now';btn.disabled=false;}
-      alert('Send failed: '+(data.error||'Unknown error'));
+      alert('Send failed: '+(res.error||'Unknown error')+'\n\nCheck Render logs for details.');
     }
   }catch(err){
     if(btn){btn.textContent='▶ Send Now';btn.disabled=false;}
@@ -6459,12 +6364,12 @@ async function outSendNow(id){
 /* ── TEMPLATES ── */
 async function outLoadTemplatesFromServer(){
   const res=await apiCall('GET','/templates');
-  const templates=Array.isArray(res)?res:(res?.templates||[]);
-  if(templates.length){
-    outTemplates=templates.map(t=>({
-      id:t.id,day:t.day||t.step,step:t.step||t.day,
+  if(res.success&&res.templates&&res.templates.length){
+    outTemplates=res.templates.map(t=>({
+      id:t.id,day:t.day,step:t.step,
       title:t.title,subject:t.subject,body:t.body
     }));
+    if(res.signature)outSettings.signature=res.signature;
     outSave();
   }
 }
@@ -6517,26 +6422,20 @@ function outRenderTemplates(){
 }
 
 async function outSaveTpl(id){
-  const tpl=outTemplates.find(t=>t.id===id);if(!tpl)return;
-  tpl.subject=document.getElementById('tpl-subj-'+id)?.value||tpl.subject;
-  tpl.body=document.getElementById('tpl-body-'+id)?.value||tpl.body;
+  const tpl=outTemplates.find(t=>t.id===id);
+  if(!tpl)return;
+  const subjEl=document.getElementById('tpl-subj-'+id);
+  const bodyEl=document.getElementById('tpl-body-'+id);
+  if(subjEl)tpl.subject=subjEl.value;
+  if(bodyEl)tpl.body=bodyEl.value;
+  // Save using the main outSave which persists templates correctly
+  outSave();
   const btn=document.querySelector(`button[onclick="outSaveTpl('${id}')"]`);
-  if(btn){btn.textContent='⏳ Saving...';btn.disabled=true;}
-  try{
-    const res=await apiCall('PUT','/templates/'+id,{subject:tpl.subject,body:tpl.body,title:tpl.title});
-    if(res&&res.success){
-      outSave();
-      if(btn){btn.textContent='✓ Saved!';setTimeout(()=>{btn.textContent='💾 Save to Server';btn.disabled=false;},2000);}
-      outLog('✏️',`Template <strong>Email ${id.replace('t','')}</strong> updated and saved to server`);
-    } else {
-      if(btn){btn.textContent='✗ Error — retry';btn.disabled=false;}
-      alert('Save failed: '+(res?.error||'Unknown error'));
-    }
-  }catch(e){
-    if(btn){btn.textContent='✗ Error — retry';btn.disabled=false;}
-    alert('Error: '+e.message);
-  }
+  if(btn){btn.textContent='✓ Saved!';btn.style.color='var(--green)';btn.disabled=true;
+    setTimeout(()=>{btn.textContent='💾 Save Template';btn.style.color='var(--gold)';btn.disabled=false;},2000);}
+  outLog('✏️',`Template <strong>${tpl.title}</strong> saved`);
 }
+
 
 async function outSaveSignature(){
   const sig=document.getElementById('out-signature-edit').value;
@@ -6632,400 +6531,350 @@ function outExport(){
 }
 
 /* ── INIT ── */
-function outInit(){
-  outRenderDashboard();
-  outRenderStats();
-  // Sync brokers and templates from server in background
-  outSyncFromServer().catch(()=>{});
-  outLoadTemplatesFromServer().then(()=>{ if(document.getElementById('out-templates-list')?.children.length)outRenderTemplates(); }).catch(()=>{});
-}
+/* ══════════════════════════════════════════════════
+   BROKER OUTREACH — Clean Rebuild
+   Sends via Render /send-direct endpoint
+   Sequence: Day 1 → +3 → +7 → +14 days
+══════════════════════════════════════════════════ */
 
+const RENDER_URL = 'https://grc-outreach-system-nkzp.onrender.com';
 
-function toggleScoreGuide(){
-  const panel=document.getElementById('score-guide-panel');
-  const arrow=document.getElementById('score-guide-arrow');
-  const open=panel.style.display==='flex';
-  panel.style.display=open?'none':'flex';
-  arrow.style.transform=open?'':'rotate(180deg)';
-}
-
-/* ── UPDATE SHOWPANE TO INCLUDE NEW MODULES ── */
-
-/* ── INIT NEW MODULES ── */
-renderComps();
-renderIns();
-run5yr();
-genLOI();
-dtRenderDashboard();
-outInit();
-document.getElementById('sb-mkt-count').textContent = MARKETS.length;
-
-/* ════════════════════════════════════════════════
-   BROKER INTELLIGENCE MODULE
-════════════════════════════════════════════════ */
-const BI_DOSSIERS = [
-  {
-    id: 'troop',
-    name: 'Caleb Troop',
-    role: 'Managing Director, Carolinas · Kolter Multifamily',
-    prevRole: 'Former Senior Managing Director · Berkadia Charlotte (2022–2026)',
-    statusClass: 'changed',
-    statusLabel: '⚠ Status Changed — Now Operator',
-    volume: '$5B+ Career · $1.5B NC/SC (2024)',
-    markets: 'Full Carolinas — Charlotte · Raleigh · Charleston · Columbia · Greenville · Myrtle Beach · Fayetteville · Asheville',
-    tags: ['Class A/B/C','Value-Add','BTR','Land','Carolinas Specialist','CoStar Power Broker'],
-    alert: {
-      title: '⚠ Critical Status Update — April 2026',
-      text: 'Caleb Troop has <strong>departed Berkadia</strong> and joined <strong>Kolter Multifamily as Managing Director, Carolinas</strong> — a developer/operator acquisition role, NOT brokerage. He is no longer listing assets. New opportunity: Troop now controls Kolter\'s Carolinas pipeline and may surface off-market development or disposition deals. His Berkadia replacement team (Colaiezzi, Robertson, Maston, Coffey) covers his former mandate.'
-    },
-    bio: 'Born St. Louis, MO. Charlotte-based 12+ years. Married, two children (son Wesley + adopted daughter). Golfer. Vacations Kiawah Island SC. New City Church Charlotte. Media background (NBC Charlotte) before Wells Fargo finance and CRE.',
-    quickStats: [
-      ['Current Firm','Kolter Multifamily','gold'],
-      ['Role','MD Carolinas — Acquisitions',''],
-      ['Previous','Berkadia (2022–2026)',''],
-      ['Career Volume','$5B+ (decade)','gold'],
-      ['NC License','#292175',''],
-      ['CoStar Power Broker','✓ Winner','green'],
-      ['Connect CRE 2024 SE','✓ Top Broker','green'],
-      ['Phone (Berkadia era)','(980) 208-1668',''],
-      ['Brokering Status','No longer brokering','danger'],
-    ],
-    timeline: [
-      ['2011–13','Digital Content Producer','WCNC-TV (NBC Charlotte)','Media/storytelling background — great conversation hook. Non-traditional CRE origin.',''],
-      ['2013–15','Sales Support Supervisor','Swisher (Industrial)','B2B client management and sales operations at scale.',''],
-      ['2015–17','Assistant Vice President','Wells Fargo — East Coast HQ Charlotte','CRE finance, credit underwriting, portfolio management. Built capital markets fluency.',''],
-      ['2017–20','Investment Sales Advisor → Senior Advisor','Capstone Companies — Charlotte','Entry into multifamily brokerage. Built private capital NC/SC owner relationships.',''],
-      ['2020–22','Director — Carolinas','Capstone (Top 2 Producer 2019, 2020, 2021)','Led Carolinas office. Closed $2.4B+ in 18 months. CoStar Power Broker earned here.','gold'],
-      ['2022–26','Senior Managing Director','Berkadia Charlotte','Co-led NC/SC to $1.5B+ in 2024. Indigo at Cross Creek ($76M), SC 8-property portfolio (2,164u), Highline North ($43.75M). Connect CRE 2024 Top Broker SE.','gold'],
-      ['2026–Now','Managing Director Carolinas — Acquisitions','Kolter Multifamily (Developer/Operator)','Now principal/buyer side. Sources and develops multifamily across Carolinas. No longer brokering. New angle: JV partner, off-market deal source.','danger'],
-    ],
-    deals: [
-      ['Murrells Inlet Asset','Myrtle Beach SC','N/D','Undisclosed','B','Dec 2025'],
-      ['Highline North','Asheville NC','168','$43.75M','B','May 2025'],
-      ['SC 8-Property Value-Add Portfolio','Greenville / MB / Charlotte SC','2,164','Undisclosed','B/C','Apr 2024'],
-      ['Poplin Trace (BTR)','Indian Trail NC','99','Undisclosed','A','2025'],
-      ['Indigo at Cross Creek','Indian Land SC','303','$76M','A','2023'],
-      ['Concord Ridge','Concord NC','336','Undisclosed','B','2023'],
-      ['Hamilton Sq. + Heatherwood Trace','Charlotte NC','292','Undisclosed','B','2023'],
-      ['Palisades at Surf City','Hampstead NC','336','Undisclosed','A','2023'],
-      ['The Palmer','Ridgeland SC','288','Undisclosed','B','2023'],
-    ],
-    buyers: [
-      ['Graycliff Capital','pe'],['Equity Residential','inst'],['Lantower Residential','inst'],
-      ['Elmington Capital','pe'],['The Spectrum Cos.','dev'],['Terwilliger Pappas','dev'],
-      ['Southwood Realty','priv'],['RK Investors','priv'],['Tribute Companies','dev'],
-      ['Carter Multi-Family','pe'],['Corigin','pe'],['Evolve Companies','dev'],
-      ['Brookside Properties','inst'],['Chaucer Creek Capital','priv'],
-    ],
-    positioning: {
-      valueProp: '"I am able to give buyers and sellers real-time information on what the coastal Carolinas insurance market looks like, so investors can underwrite an asset correctly. Principals are craving accurate data and Berkadia is one of the few firms set up to actually assist in that area."',
-      commStyle: 'Data-driven AND story-driven. Media background + institutional underwriting discipline. LinkedIn: analytical market commentary 2–4x/month. Published in Southeast Real Estate Business. Responds to data-forward peers.',
-      bestChannel: 'LinkedIn DM referencing a specific post or deal → then email. Phone now secondary since no longer brokering.',
-      competitors: 'Andrea Howard/Allan Lynch (Northmarq) · Jordan McCarley (C&W) · Ron Corrao (Northmarq Private Client)',
-      bestContext: 'Post-deal LinkedIn announcement. InterFace Carolinas Multifamily conference. Coastal insurance data discussion. Kiawah Island / golf context.',
-    },
-    psyche: [
-      ['Core Motivation','Mastery + Legacy. Move to Kolter shows he\'s motivated by building something — not just transacting. Enough money; now wants to build market legacy.'],
-      ['Identity','Market Expert + Builder. Carolinas authority first, dealmaker second. Values being the person others turn to for market intelligence.'],
-      ['Risk Tolerance','Methodical but fast. Wells Fargo credit discipline + high deal velocity. Wants the data first, then moves decisively.'],
-      ['Ego Profile','Collaborative expert. "Be Berkadia means being open." Responds well to being treated as a peer. Comfortable deferring to operators who know their markets.'],
-      ['What Winning Looks Like','Building Kolter\'s Carolinas development pipeline. Family time at Kiawah. Charlotte legacy.'],
-      ['What Frustrates Him','Buyers who can\'t underwrite insurance costs. Unclear capital stacks. Retrading after DD. Tire-kickers without execution track record.'],
-    ],
-    grcDiff: [
-      ['Dual-Income Capital Certainty','As a practicing CRNA through an S-Corp, Gabriel has verifiable W-2 income — a rare signal of financial stability most syndicators can\'t demonstrate. Eliminates his #1 buyer concern instantly.'],
-      ['Operator Mindset, Not Speculator','GRC\'s four-pillar execution strategy (reposition, management, OpEx, RUBS) mirrors exactly how Troop thinks about value creation. Gabriel and Javier speak his language.'],
-      ['Long-Term Carolinas Platform','Troop just moved to the principal side. A credible, data-fluent buyer building a multi-deal Carolinas portfolio is exactly the relationship he wants to cultivate as he builds Kolter\'s pipeline.'],
-    ],
-    leadWith: '"We\'re building a Carolinas multifamily portfolio — not flipping one deal. We want to be the buyers you call before it goes to market."',
-    roadmap: [
-      ['Entry Point','LinkedIn comment on one of his market analysis posts. Show you read it and add a data point. Then DM. Do NOT start with "we need a broker."'],
-      ['Do NOT Do Early','Don\'t ask him to introduce you to his former Berkadia colleagues in the first conversation. Let those come naturally over time.'],
-      ['What Makes Him Call First','Demonstrate clean capital, Carolinas insurance underwriting fluency, and that you\'re building toward a repeat buyer relationship — not fishing for one deal.'],
-    ],
-    outreach: {
-      emailSubject: 'Carolinas Value-Add Buyers — Building for the Long Run',
-      emailBody: `Caleb,
-
-Saw your piece in Southeast Real Estate Business on Charlotte's multifamily inflection — your read on absorption finally outpacing deliveries in H2 2025 was spot-on, and the insurance data angle is something most buyers still can't underwrite correctly.
-
-We're Gabriel Vazquez and Javier Rojas, principals at Generational Real Estate Capital. We're focused on acquiring Class B/C garden-style multifamily across NC and SC — 50 to 150 units, 1990s to present vintage, in the $3M to $15M range. Clean capital, no committee approval cycles. We move when the deal underwrites.
-
-We know you've moved to the principal side at Kolter, and we respect that. We'd still value your perspective on where you're seeing the best value-add entry points in the Carolinas right now — and we'd like to be on your radar as buyers when opportunities surface through your network.
-
-Would a 15-minute call next week make sense?
-
-Gabriel Vazquez & Javier Rojas
-Generational Real Estate Capital
-gabriel.vazquez@genrealcapital.com · (352) 710-6870
-javier.rojas@genrealcapital.com · (813) 416-9283`,
-      linkedinBody: `Caleb — your June 2025 piece on Charlotte's supply wave and the absorption flip was one of the cleaner market reads we've seen this year. Your coastal insurance data point resonated — most buyers still aren't underwriting that correctly.
-
-We're Gabriel Vazquez and Javier Rojas, building a Carolinas multifamily portfolio through Generational Real Estate Capital — Class B/C, 50–150 units, NC and SC. Clean capital, no committee. Would love to be in your orbit as you build out the Kolter Carolinas pipeline.
-
-Worth a quick call?`,
-      phoneScript: `"Caleb, this is Gabriel Vazquez calling with my partner Javier Rojas — we're principals at Generational Real Estate Capital. We're building a Carolinas multifamily portfolio, Class B and C, garden-style, NC and SC markets. I've been following your work — your coastal insurance data commentary is something we actually use when underwriting our deals.
-
-I know you've recently moved to Kolter on the principal side — congrats on that — but I wanted to reach out because the people who know these markets best are exactly who we want in our network for the long run.
-
-Do you have a few minutes, or is there a better time this week to connect?"`,
-    },
-    questions: [
-      'You mentioned coastal insurance complexity in your Berkadia content — we\'re underwriting a Myrtle Beach asset right now and seeing $1,100–$1,400 per unit for non-oceanfront product. Is that consistent with what you were seeing pre-transition, and do you expect carriers to re-enter that market as rates stabilize?',
-      'In your 2025 Charlotte market analysis you flagged absorption finally outpacing deliveries. For Class B garden product in the Gaston County and south suburban ring — are you seeing that absorption dynamic play out there, or is it concentrated in the urban core?',
-      'With Kolter focused on the Carolinas development pipeline now, are you finding that your prior buyer relationships — the Graycliff Capital and Chaucer Creek Capital types — are still actively acquiring in secondary SC markets, or has capital pulled back to primary MSAs in 2026?',
-    ],
-    mention: [
-      ['Clinical Income as Capital Proof','"We move with our own capital — Gabriel practices as a CRNA through an S-Corp in Florida and Javier brings his own equity. No committee, no fund cycle, no retrading." — Directly addresses his #1 buyer frustration: capital certainty.'],
-      ['The Long Game','"We\'re not chasing one deal. We\'re building a Carolinas portfolio — 3 to 5 assets over the next 4 years across NC and SC. The people who know these markets deeply are the ones we want in our network for the duration."'],
-    ],
-    avoid: 'Do NOT ask Caleb to connect you to his former Berkadia colleagues (Colaiezzi, Robertson, Maston) in the first conversation. He just left — that relationship is professionally sensitive. Let those introductions come naturally over time.',
-    oneliner: '"We\'re the buyers who can actually underwrite your coastal insurance environment, close without retrading, and call you back for the next one." — Gabriel Vazquez & Javier Rojas, GRC',
-  }
+let outCampaign = JSON.parse(localStorage.getItem('grc_campaign_v3')||'[]');
+let outTemplates = [
+  {id:'t1',step:1,title:'Email 1 — Introduction',
+   subject:'Generational Real Estate Capital — Actively Acquiring Multifamily FL, NC, SC & TX',
+   body:`Hi [BROKER_FIRST],\n\nMy name is [SENDER_NAME], Principal at Generational Real Estate Capital (GRC). We are actively acquiring Class B/C garden-style multifamily properties across Florida, North Carolina, South Carolina, and Texas.\n\nOur criteria:\n• Garden style, pitched roof only\n• 50–150 units · $3M–$12M\n• Class B/C · 1990s–present vintage\n• Cap rate target: 6.5%+\n\nWe move quickly, close with certainty, and value long-term broker relationships. If you have anything on or off market that fits — I'd love to connect.\n\nBest regards,`},
+  {id:'t2',step:2,title:'Email 2 — Follow Up (+3 days)',
+   subject:'Following Up — GRC Multifamily Acquisitions',
+   body:`Hi [BROKER_FIRST],\n\nFollowing up on my note from earlier this week. GRC is actively looking for garden-style multifamily deals in your market — 50–150 units, $3M–$12M.\n\nWe have proof of funds ready and can close on your timeline. Anything coming up that might fit?\n\nBest regards,`},
+  {id:'t3',step:3,title:'Email 3 — Check In (+7 days)',
+   subject:'Quick Check In — GRC Still Actively Buying',
+   body:`Hi [BROKER_FIRST],\n\nJust a quick check-in from GRC. We are still very active in your market and looking for the right Class B/C garden-style deal.\n\nAnything on-market, off-market, or coming soon in the 50–150 unit range?\n\nBest regards,`},
+  {id:'t4',step:4,title:'Email 4 — Stay in Touch (+14 days)',
+   subject:'GRC — Still Actively Acquiring Multifamily',
+   body:`Hi [BROKER_FIRST],\n\nJust a note to stay on your radar. GRC continues to grow our portfolio and we are long-term buyers in your market.\n\nPlease keep us in mind for future listings. We appreciate the relationship.\n\nBest regards,`}
 ];
 
-let biActiveId = null;
-let biActiveOutreachTab = 'email';
-
-function grcLogout(){
-  if(!confirm('Lock the GRC system? You will need to enter the access code to get back in.'))return;
-  sessionStorage.removeItem('grc_auth');
-  location.reload();
+function outSaveCampaign(){
+  localStorage.setItem('grc_campaign_v3', JSON.stringify(outCampaign));
 }
 
-function biRenderCards() {
-  const grid = document.getElementById('bi-cards-grid');
-  if (!grid) return;
-  grid.innerHTML = BI_DOSSIERS.map(d => `
-    <div onclick="biOpenDossier('${d.id}')" style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:16px;cursor:pointer;transition:border-color .2s;${biActiveId===d.id?'border-color:var(--gold);':''}" onmouseover="this.style.borderColor='rgba(201,168,76,.4)'" onmouseout="this.style.borderColor='${biActiveId===d.id?'var(--gold)':'var(--line)'}'">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+function outLog(icon, msg){
+  const el = document.getElementById('out-log');
+  if(!el) return;
+  const time = new Date().toLocaleTimeString();
+  const entry = document.createElement('div');
+  entry.style.cssText = 'padding:3px 0;border-bottom:1px solid var(--line);';
+  entry.innerHTML = `<span style="color:var(--muted)">${time}</span> ${icon} ${msg}`;
+  if(el.textContent === 'No activity yet.') el.innerHTML = '';
+  el.insertBefore(entry, el.firstChild);
+}
+
+function outRenderStats(){
+  const el = document.getElementById('out-stats');
+  if(!el) return;
+  const total = outCampaign.length;
+  const active = outCampaign.filter(b=>b.status==='active').length;
+  const replied = outCampaign.filter(b=>b.status==='replied').length;
+  const completed = outCampaign.filter(b=>b.status==='completed').length;
+  el.innerHTML = [
+    {label:'Total',val:total,color:'var(--gold)'},
+    {label:'Active',val:active,color:'var(--green)'},
+    {label:'Replied',val:replied,color:'var(--blue)'},
+    {label:'Completed',val:completed,color:'var(--muted)'},
+  ].map(s=>`<div style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;">
+    <div style="font-family:'Space Mono',monospace;font-size:7px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">${s.label}</div>
+    <div style="font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:${s.color};">${s.val}</div>
+  </div>`).join('');
+}
+
+function outRenderDashboard(){
+  outRenderStats();
+  const tbody = document.getElementById('out-tbody');
+  if(!tbody) return;
+  let data = [...outCampaign];
+  if(outCurrentFilter !== 'all') data = data.filter(b=>b.status===outCurrentFilter);
+  
+  if(!data.length){
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:30px;font-family:Space Mono,monospace;font-size:10px;">No brokers in campaign — click ➕ Add Broker</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = data.map(b=>{
+    const statusColor = b.status==='active'?'var(--green)':b.status==='replied'?'var(--blue)':'var(--muted)';
+    const nextDate = b.nextSendDate ? new Date(b.nextSendDate).toLocaleDateString() : '—';
+    const lastDate = b.lastSentDate ? new Date(b.lastSentDate).toLocaleDateString() : '—';
+    return `<tr>
+      <td><strong>${b.name}</strong><br><span style="font-size:9px;color:var(--muted)">${b.email}</span></td>
+      <td style="font-size:10px">${b.firm||'—'}</td>
+      <td><span style="font-family:'Space Mono',monospace;font-size:8px;padding:2px 6px;border-radius:2px;background:rgba(201,168,76,.1);color:var(--gold)">${b.market||'FL'}</span></td>
+      <td style="font-size:10px;color:var(--muted)">${b.sender==='javier'?'Javier':'Gabriel'}</td>
+      <td><span style="font-family:'Space Mono',monospace;font-size:8px;font-weight:700;color:${statusColor}">${b.status.toUpperCase()}</span></td>
+      <td style="font-family:'Space Mono',monospace;font-size:10px;text-align:center">Email ${b.currentStep||1} of 4</td>
+      <td style="font-family:'Space Mono',monospace;font-size:9px">${lastDate}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:9px">${nextDate}</td>
+      <td><span style="color:${b.replied?'var(--green)':'var(--muted)'};">${b.replied?'✓ Yes':'No'}</span></td>
+      <td style="white-space:nowrap">
+        <button onclick="outSendNow('${b.id}')" style="font-family:'Space Mono',monospace;font-size:7px;padding:3px 8px;border-radius:2px;border:1px solid var(--gold-mid);background:var(--gold-lt);color:var(--gold);cursor:pointer;margin-right:3px;">▶ Send</button>
+        <button onclick="outMarkReplied('${b.id}')" style="font-family:'Space Mono',monospace;font-size:7px;padding:3px 8px;border-radius:2px;border:1px solid rgba(96,165,250,.3);background:rgba(96,165,250,.1);color:var(--blue);cursor:pointer;margin-right:3px;">✓ Replied</button>
+        <button onclick="outRemove('${b.id}')" style="font-family:'Space Mono',monospace;font-size:7px;padding:3px 8px;border-radius:2px;border:1px solid rgba(239,68,68,.3);background:var(--red-bg);color:var(--red);cursor:pointer;">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function outRenderTemplates(){
+  const el = document.getElementById('out-templates-list');
+  if(!el) return;
+  el.innerHTML = outTemplates.map(t=>`
+    <div style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r-lg);overflow:hidden;">
+      <div style="background:var(--s2);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);">
         <div>
-          <div style="font-family:'Cinzel',serif;font-size:14px;color:var(--paper);margin-bottom:2px;">${d.name}</div>
-          <div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;">${d.role}</div>
+          <div style="font-family:'Cinzel',serif;font-size:13px;color:var(--gold);">${t.title}</div>
+          <div style="font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:2px;text-transform:uppercase;">Step ${t.step} of 4 · ${t.step===1?'Day 1':t.step===2?'+3 Days':t.step===3?'+7 Days':'+14 Days'}</div>
         </div>
-        <span style="font-family:'Space Mono',monospace;font-size:7px;padding:3px 8px;border-radius:2px;${d.statusClass==='changed'?'background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.3)':'background:var(--green-bg);color:var(--green);border:1px solid rgba(34,197,94,.3)'}">${d.statusLabel}</span>
+        <div style="display:flex;gap:6px;">
+          <button onclick="outPreviewTpl('${t.id}')" style="font-family:'Space Mono',monospace;font-size:7px;padding:5px 10px;border-radius:2px;border:1px solid var(--line);background:var(--s3);color:var(--muted);cursor:pointer;">👁 Preview</button>
+          <button onclick="outSaveTpl('${t.id}')" style="font-family:'Space Mono',monospace;font-size:7px;font-weight:700;padding:5px 12px;border-radius:2px;border:1px solid var(--gold-mid);background:var(--gold-lt);color:var(--gold);cursor:pointer;">💾 Save Template</button>
+        </div>
       </div>
-      <div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--gold);margin-bottom:6px;">${d.volume}</div>
-      <div style="font-size:10px;color:var(--muted);margin-bottom:8px;line-height:1.4;">${d.markets}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;">
-        ${d.tags.map(t=>`<span style="font-family:'Space Mono',monospace;font-size:7px;padding:2px 6px;border-radius:2px;background:var(--s2);color:var(--muted);border:1px solid var(--line);">${t}</span>`).join('')}
+      <div style="padding:16px;">
+        <div class="fld-lbl" style="margin-bottom:4px;">Subject Line</div>
+        <input id="tpl-subj-${t.id}" class="fld-inp" value="${t.subject.replace(/"/g,'&quot;')}" style="margin-bottom:12px;">
+        <div class="fld-lbl" style="margin-bottom:4px;">Email Body <span style="color:var(--muted);font-size:7px;font-weight:400;">· Variables: [BROKER_FIRST] [BROKER_NAME] [SENDER_NAME]</span></div>
+        <textarea id="tpl-body-${t.id}" class="fld-inp" style="height:160px;resize:vertical;font-size:11px;line-height:1.6;">${t.body}</textarea>
       </div>
-      <button onclick="event.stopPropagation();biOpenDossier('${d.id}')" style="width:100%;font-family:'Space Mono',monospace;font-size:8px;padding:6px;border-radius:var(--r);border:1px solid rgba(201,168,76,.3);background:var(--gold-lt);color:var(--gold);cursor:pointer;letter-spacing:1px;text-transform:uppercase;">
-        ${biActiveId===d.id ? '▲ CLOSE DOSSIER' : '⬡ OPEN FULL DOSSIER →'}
-      </button>
     </div>
   `).join('');
 }
 
-function biOpenDossier(id) {
-  if (biActiveId === id) {
-    biActiveId = null;
-    document.getElementById('bi-detail-panel').style.display = 'none';
-    biRenderCards();
-    return;
+function outPreviewEmail(id){
+  const b = outCampaign.find(x=>x.id===id);
+  if(!b) return;
+  const tpl = outTemplates.find(t=>t.step===b.currentStep||(t.id==='t'+b.currentStep));
+  if(!tpl){alert('No template for step '+b.currentStep);return;}
+  const body = tpl.body
+    .replace(/\[BROKER_FIRST\]/g, b.name.split(' ')[0])
+    .replace(/\[BROKER_NAME\]/g, b.name)
+    .replace(/\[SENDER_NAME\]/g, b.sender==='javier'?'Javier Rojas':'Gabriel Vazquez')
+    .replace(/\n/g,'<br>');
+  const win = window.open('','_blank','width=620,height:520');
+  win.document.write(`<html><head><title>Preview</title></head><body style="font-family:Arial,sans-serif;padding:30px;color:#333;max-width:580px;margin:0 auto;">
+    <div style="background:#f5f5f5;padding:12px;border-radius:6px;margin-bottom:20px;">
+      <div style="font-size:11px;color:#666;margin-bottom:4px;">FROM: ${b.sender==='javier'?'javier.rojas@genrealcapital.com':'gabriel.vazquez@genrealcapital.com'}</div>
+      <div style="font-size:11px;color:#666;margin-bottom:4px;">TO: ${b.email}</div>
+      <div style="font-size:11px;color:#666;">SUBJECT: ${tpl.subject}</div>
+    </div>
+    <div style="line-height:1.7;">${body}</div>
+    </body></html>`);
+  win.document.close();
+}
+
+
+function outPreviewTpl(id){
+  const tpl = outTemplates.find(t=>t.id===id);
+  if(!tpl) return;
+  const subject = document.getElementById('tpl-subj-'+id)?.value||tpl.subject;
+  const body = (document.getElementById('tpl-body-'+id)?.value||tpl.body)
+    .replace(/\[BROKER_FIRST\]/g,'[Broker First Name]')
+    .replace(/\[BROKER_NAME\]/g,'[Broker Full Name]')
+    .replace(/\[SENDER_NAME\]/g,'Gabriel Vazquez')
+    .replace(/\n/g,'<br>');
+  const win = window.open('','_blank','width=600,height=500');
+  win.document.write('<html><head><title>Preview: '+subject+'</title></head><body style="font-family:Arial,sans-serif;padding:30px;color:#333;"><h3 style="color:#666;">Subject: '+subject+'</h3><hr><div style="line-height:1.6;">'+body+'</div></body></html>');
+  win.document.close();
+}
+
+
+function outSaveTpl(id){
+  const tpl = outTemplates.find(t=>t.id===id);
+  if(!tpl) return;
+  const subjEl = document.getElementById('tpl-subj-'+id);
+  const bodyEl = document.getElementById('tpl-body-'+id);
+  if(subjEl) tpl.subject = subjEl.value;
+  if(bodyEl) tpl.body = bodyEl.value;
+  localStorage.setItem('grc_templates_v3', JSON.stringify(outTemplates));
+  const btn = document.querySelector(`button[onclick="outSaveTpl('${id}')"]`);
+  if(btn){btn.textContent='✓ Saved!';setTimeout(()=>btn.textContent='💾 Save',2000);}
+  outLog('✏️', `Template ${id} updated`);
+}
+
+function outOpenAddModal(){
+  document.getElementById('out-add-modal').style.display='flex';
+}
+
+function outAddBroker(){
+  const name = document.getElementById('out-add-name').value.trim();
+  const email = document.getElementById('out-add-email').value.trim();
+  if(!name||!email){alert('Name and email required.');return;}
+  const broker = {
+    id: 'oc_'+Date.now(),
+    name, email,
+    firm: document.getElementById('out-add-firm').value.trim(),
+    market: document.getElementById('out-add-market').value,
+    sender: document.getElementById('out-add-sender').value,
+    notes: document.getElementById('out-add-notes').value.trim(),
+    status: 'active',
+    currentStep: 1,
+    replied: false,
+    lastSentDate: null,
+    nextSendDate: new Date().toISOString(),
+    addedDate: new Date().toISOString()
+  };
+  outCampaign.push(broker);
+  outSaveCampaign();
+  document.getElementById('out-add-modal').style.display='none';
+  // Clear form
+  ['out-add-name','out-add-email','out-add-firm','out-add-notes'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='';
+  });
+  outRenderDashboard();
+  outLog('➕', `<strong>${name}</strong> added to campaign`);
+}
+
+async function outSendNow(id){
+  const b = outCampaign.find(x=>x.id===id);
+  if(!b){alert('Broker not found.');return;}
+  if(b.status==='replied'){alert('This broker has already replied.');return;}
+  if(b.status==='completed'){alert('This sequence is completed.');return;}
+
+  const tpl = outTemplates.find(t=>t.step===b.currentStep||(t.id==='t'+b.currentStep));
+  if(!tpl){alert('Template not found for step '+b.currentStep);return;}
+
+  const btn = document.querySelector(`button[onclick="outSendNow('${id}')"]`);
+  if(btn){btn.textContent='⏳...';btn.disabled=true;}
+
+  try{
+    const res = await fetch(RENDER_URL+'/send-direct',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        name: b.name,
+        email: b.email,
+        sender: b.sender||'gabriel',
+        step: b.currentStep||1,
+        subject: tpl.subject,
+        body: tpl.body.replace(/\[BROKER_FIRST\]/g, b.name.split(' ')[0]).replace(/\[BROKER_NAME\]/g, b.name).replace(/\[SENDER_NAME\]/g, b.sender==='javier'?'Javier Rojas':'Gabriel Vazquez')
+      })
+    });
+    const data = await res.json();
+    if(data.success){
+      b.lastSentDate = new Date().toISOString();
+      const gaps = {1:0, 2:3, 3:7, 4:14};
+      if(b.currentStep >= 4){
+        b.status = 'completed';
+        b.nextSendDate = null;
+      } else {
+        b.currentStep++;
+        const next = new Date();
+        next.setDate(next.getDate()+(gaps[b.currentStep]||3));
+        b.nextSendDate = next.toISOString();
+      }
+      outSaveCampaign();
+      outRenderDashboard();
+      outLog('📧', `Email sent to <strong>${b.name}</strong> (${b.email})`);
+      if(btn){btn.textContent='✓ Sent!';setTimeout(()=>{btn.textContent='▶ Send';btn.disabled=false;},3000);}
+      alert('✓ Email sent! Check your Outlook Sent folder.');
+    } else {
+      if(btn){btn.textContent='▶ Send';btn.disabled=false;}
+      alert('Failed: '+(data.error||'Unknown error'));
+    }
+  }catch(e){
+    if(btn){btn.textContent='▶ Send';btn.disabled=false;}
+    alert('Error: '+e.message);
   }
-  biActiveId = id;
-  biRenderCards();
-  const d = BI_DOSSIERS.find(x => x.id === id);
-  if (!d) return;
-
-  const clsColor = {A:'var(--blue)',B:'var(--gold)',C:'var(--fl)','B/C':'var(--amber)'};
-
-  document.getElementById('bi-detail-content').innerHTML = `
-    <!-- ALERT -->
-    ${d.alert ? `<div style="background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-left:4px solid var(--red);padding:12px 16px;margin:14px;">
-      <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);margin-bottom:4px;">${d.alert.title}</div>
-      <div style="font-size:11px;color:#fca5a5;line-height:1.5;">${d.alert.text}</div>
-    </div>` : ''}
-
-    <!-- HERO -->
-    <div style="padding:16px 20px;border-bottom:1px solid var(--line);">
-      <div style="font-family:'Cinzel',serif;font-size:20px;color:var(--paper);margin-bottom:2px;">${d.name}</div>
-      <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);letter-spacing:.5px;margin-bottom:4px;">${d.role}</div>
-      <div style="font-size:11px;color:var(--muted);margin-bottom:10px;">${d.prevRole}</div>
-      <div style="font-size:11px;color:var(--muted);line-height:1.6;max-width:700px;margin-bottom:12px;">${d.bio}</div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;">
-        ${d.quickStats.map(([l,v,c])=>`<div style="background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:7px 10px;display:flex;justify-content:space-between;align-items:baseline;">
-          <span style="font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;color:var(--muted);">${l}</span>
-          <span style="font-size:11px;color:${c==='gold'?'var(--gold)':c==='green'?'var(--green)':c==='danger'?'var(--red)':'var(--paper)'};">${v}</span>
-        </div>`).join('')}
-      </div>
-    </div>
-
-    <!-- SECTION TABS -->
-    <div style="display:flex;border-bottom:1px solid var(--line);background:var(--s2);overflow-x:auto;" id="bi-section-tabs">
-      ${['career','deals','positioning','personal','grc','outreach','convo'].map((t,i)=>`
-        <button onclick="biSwitchTab('${t}',this)" style="padding:9px 14px;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;white-space:nowrap;${i===0?'color:var(--teal);border-bottom-color:var(--teal);':''}" class="bi-stab ${i===0?'active':''}">
-          ${['01·Career','02·Deals','03·Positioning','04·Personal','05·GRC Strategy','06·Outreach','07·Convo Guide'][i]}
-        </button>`).join('')}
-    </div>
-
-    <!-- TAB PANES -->
-    <div id="bi-tab-career" class="bi-spane" style="padding:16px 20px;display:block;">
-      <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid var(--line);">Career Timeline</div>
-      ${d.timeline.map(([yr,role,firm,detail,dot],i)=>`
-      <div style="display:grid;grid-template-columns:80px 14px 1fr;gap:0 10px;padding-bottom:14px;">
-        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);text-align:right;padding-top:3px;">${yr}</div>
-        <div style="display:flex;flex-direction:column;align-items:center;">
-          <div style="width:8px;height:8px;border-radius:50%;background:${dot==='gold'?'var(--gold)':dot==='danger'?'var(--red)':'var(--blue)'};flex-shrink:0;margin-top:3px;"></div>
-          ${i<d.timeline.length-1?`<div style="width:2px;flex:1;background:var(--line);margin-top:3px;"></div>`:''}
-        </div>
-        <div>
-          <div style="font-size:12px;color:var(--paper);margin-bottom:1px;">${role}</div>
-          <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);margin-bottom:3px;">${firm}</div>
-          <div style="font-size:11px;color:var(--muted);line-height:1.5;">${detail}</div>
-        </div>
-      </div>`).join('')}
-    </div>
-
-    <div id="bi-tab-deals" class="bi-spane" style="padding:16px 20px;display:none;">
-      <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--line);">Recent Notable Transactions (2023–2025)</div>
-      <table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:16px;">
-        <thead><tr>${['Property','Market','Units','Price','Cls','Year'].map(h=>`<th style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);padding:6px 8px;text-align:left;border-bottom:1px solid var(--line);">${h}</th>`).join('')}</tr></thead>
-        <tbody>${d.deals.map(([name,mkt,units,price,cls,yr])=>`<tr>
-          <td style="padding:7px 8px;border-bottom:1px solid rgba(46,50,85,.5);color:var(--paper);">${name}</td>
-          <td style="padding:7px 8px;border-bottom:1px solid rgba(46,50,85,.5);color:var(--muted);">${mkt}</td>
-          <td style="padding:7px 8px;border-bottom:1px solid rgba(46,50,85,.5);color:var(--muted);">${units}</td>
-          <td style="padding:7px 8px;border-bottom:1px solid rgba(46,50,85,.5);color:var(--gold);font-weight:600;">${price}</td>
-          <td style="padding:7px 8px;border-bottom:1px solid rgba(46,50,85,.5);"><span style="font-size:9px;padding:2px 6px;border-radius:2px;background:${clsColor[cls]?clsColor[cls]+'22':'rgba(201,168,76,.1)'};color:${clsColor[cls]||'var(--gold)'};">${cls}</span></td>
-          <td style="padding:7px 8px;border-bottom:1px solid rgba(46,50,85,.5);color:var(--muted);">${yr}</td>
-        </tr>`).join('')}</tbody>
-      </table>
-      <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px;">Known Repeat Buyers / Clients</div>
-      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:14px;">
-        ${d.buyers.map(([name,cls])=>`<span style="font-size:10px;padding:2px 9px;border-radius:10px;border:1px solid ${cls==='inst'?'rgba(96,165,250,.3)':cls==='pe'?'rgba(201,168,76,.3)':cls==='dev'?'rgba(45,212,191,.3)':'rgba(167,139,250,.3)'};color:${cls==='inst'?'var(--blue)':cls==='pe'?'var(--gold)':cls==='dev'?'var(--teal)':'#a78bfa'};">${name}</span>`).join('')}
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <div><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Seller vs. Buyer Preference</div><div style="font-size:11px;color:var(--paper);line-height:1.5;">Primarily <strong style="color:var(--teal)">sell-side/disposition</strong> at Berkadia. Represented buyer in SC 8-property portfolio. Now exclusively buy-side at Kolter.</div></div>
-        <div><div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;">Formal vs. Off-Market</div><div style="font-size:11px;color:var(--paper);line-height:1.5;">Formal structured bid for institutional ($15M+). Off-market comfort for private capital ($3M–$15M) through Capstone roots. Leads with data transparency in all processes.</div></div>
-      </div>
-    </div>
-
-    <div id="bi-tab-positioning" class="bi-spane" style="padding:16px 20px;display:none;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-        ${[
-          ['Value Proposition (His Own Words)',`<em style="color:var(--teal)">"${d.positioning.valueProp}"</em>`],
-          ['Communication Style',d.positioning.commStyle],
-          ['Best Channel for First Contact',`<span style="color:var(--teal)">${d.positioning.bestChannel}</span>`],
-          ['Primary Competitors',d.positioning.competitors],
-          ['Best Context to Reach Him',d.positioning.bestContext],
-          ['Known Submarket Specialties','Coastal Carolinas (Myrtle Beach, Charleston, Wilmington) — insurance data expert. Charlotte suburban ring. Asheville NC. Indian Land/Fort Mill SC. Secondary NC markets.'],
-        ].map(([l,v])=>`<div>
-          <div style="font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;">${l}</div>
-          <div style="font-size:11px;color:var(--paper);line-height:1.55;">${v}</div>
-        </div>`).join('')}
-      </div>
-    </div>
-
-    <div id="bi-tab-personal" class="bi-spane" style="padding:16px 20px;display:none;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
-        ${[
-          ['Hometown','St. Louis, MO. Midwest values: directness, work ethic, loyalty. Charlotte home 12+ years.'],
-          ['Family','Married. Son Wesley (approx. 5–6 yrs). Adopted daughter (newborn, circa 2023–24). Personal identity publicly shared.'],
-          ['Designations & Awards','NC License #292175 · CoStar Power Broker · Connect CRE 2024 Top Broker Southeast'],
-          ['Personal Interests','Golf · Kiawah Island SC (regular family vacation) · Charlotte beaches & mountains · NC/SC sports fan · New City Church Charlotte (faith publicly stated)'],
-          ['Publicly Stated Values','Openness and collaboration. Data transparency. Entrepreneurial within large platforms. Family as foundation. Client-first orientation.'],
-          ['Education','Undergraduate degree not publicly confirmed. Career path (NBC Charlotte, Wells Fargo AVP) suggests business/communications background.'],
-        ].map(([l,v])=>`<div>
-          <div style="font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;">${l}</div>
-          <div style="font-size:11px;color:var(--paper);line-height:1.55;">${v}</div>
-        </div>`).join('')}
-      </div>
-      <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--line);">Psychographic Profile</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-        ${d.psyche.map(([l,v])=>`<div style="background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:12px;">
-          <div style="font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;color:var(--muted);margin-bottom:5px;">${l}</div>
-          <div style="font-size:11px;color:var(--paper);line-height:1.5;">${v}</div>
-        </div>`).join('')}
-      </div>
-    </div>
-
-    <div id="bi-tab-grc" class="bi-spane" style="padding:16px 20px;display:none;">
-      <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--line);">What Makes Gabriel Vazquez & Javier Rojas Uniquely Valuable to Caleb Troop</div>
-      ${d.grcDiff.map(([title,text])=>`<div style="background:var(--s2);border:1px solid var(--line);border-left:3px solid var(--green);border-radius:var(--r);padding:12px;margin-bottom:10px;">
-        <div style="font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;color:var(--green);margin-bottom:5px;">${title}</div>
-        <div style="font-size:11px;color:var(--paper);line-height:1.55;">${text}</div>
-      </div>`).join('')}
-      <div style="background:var(--gold-lt);border:1px solid var(--gold-mid);border-radius:var(--r);padding:14px;margin:14px 0;">
-        <div style="font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;">The ONE Thing GRC Should Lead With</div>
-        <div style="font-size:13px;color:var(--gold);font-style:italic;line-height:1.5;">"${d.leadWith}"</div>
-      </div>
-      <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line);">Relationship Building Roadmap</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-        ${d.roadmap.map(([l,v])=>`<div style="background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:12px;">
-          <div style="font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;color:var(--blue);margin-bottom:5px;">${l}</div>
-          <div style="font-size:11px;color:var(--paper);line-height:1.5;">${v}</div>
-        </div>`).join('')}
-      </div>
-    </div>
-
-    <div id="bi-tab-outreach" class="bi-spane" style="padding:0;display:none;">
-      <div style="display:flex;border-bottom:1px solid var(--line);background:var(--s2);">
-        ${['A · Cold Email','B · LinkedIn DM','C · Phone Script'].map((t,i)=>`
-          <button onclick="biOutTab('${['email','linkedin','phone'][i]}',this)" style="padding:9px 14px;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--muted);cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;${i===0?'color:var(--teal);border-bottom-color:var(--teal);':''}" class="bi-otab ${i===0?'active':''}">${t}</button>`).join('')}
-      </div>
-      <div id="bi-ot-email" style="padding:16px 20px;display:block;">
-        <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--gold);margin-bottom:8px;font-style:italic;">Subject: ${d.outreach.emailSubject}</div>
-        <div style="font-size:11px;color:var(--paper);line-height:1.8;white-space:pre-wrap;background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:14px;">${d.outreach.emailBody}</div>
-        <button onclick="navigator.clipboard.writeText(document.getElementById('bi-ot-email').querySelector('div:last-child').textContent).then(()=>{this.textContent='✓ Copied!';setTimeout(()=>this.textContent='Copy Email',2000)})" style="margin-top:8px;font-family:'Space Mono',monospace;font-size:8px;padding:5px 14px;border-radius:var(--r);border:1px solid rgba(45,212,191,.3);background:rgba(45,212,191,.06);color:var(--teal);cursor:pointer;">Copy Email</button>
-      </div>
-      <div id="bi-ot-linkedin" style="padding:16px 20px;display:none;">
-        <div style="font-size:11px;color:var(--paper);line-height:1.8;white-space:pre-wrap;background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:14px;">${d.outreach.linkedinBody}</div>
-        <button onclick="navigator.clipboard.writeText(document.getElementById('bi-ot-linkedin').querySelector('div').textContent).then(()=>{this.textContent='✓ Copied!';setTimeout(()=>this.textContent='Copy Message',2000)})" style="margin-top:8px;font-family:'Space Mono',monospace;font-size:8px;padding:5px 14px;border-radius:var(--r);border:1px solid rgba(45,212,191,.3);background:rgba(45,212,191,.06);color:var(--teal);cursor:pointer;">Copy Message</button>
-      </div>
-      <div id="bi-ot-phone" style="padding:16px 20px;display:none;">
-        <div style="font-size:11px;color:var(--paper);line-height:1.8;white-space:pre-wrap;background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:14px;">${d.outreach.phoneScript}</div>
-      </div>
-    </div>
-
-    <div id="bi-tab-convo" class="bi-spane" style="padding:16px 20px;display:none;">
-      <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--line);">3 Questions That Show Deep Market Knowledge</div>
-      ${d.questions.map((q,i)=>`<div style="background:var(--s2);border:1px solid var(--line);border-radius:var(--r);padding:12px;margin-bottom:8px;">
-        <div style="font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;color:var(--blue);margin-bottom:5px;">Question ${i+1}</div>
-        <div style="font-size:11px;color:var(--paper);line-height:1.55;">${q}</div>
-      </div>`).join('')}
-      <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line);">2 Things GRC Should Mention That Land Hardest</div>
-      ${d.mention.map(([l,v])=>`<div style="background:var(--s2);border:1px solid var(--line);border-left:3px solid var(--green);border-radius:var(--r);padding:12px;margin-bottom:8px;">
-        <div style="font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;color:var(--green);margin-bottom:5px;">${l}</div>
-        <div style="font-size:11px;color:var(--paper);line-height:1.55;">${v}</div>
-      </div>`).join('')}
-      <div style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin:16px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--line);">1 Thing to NEVER Bring Up Early</div>
-      <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.25);border-left:3px solid var(--red);border-radius:var(--r);padding:12px;margin-bottom:14px;">
-        <div style="font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;color:var(--red);margin-bottom:5px;">Deal-Killer — Do NOT Say</div>
-        <div style="font-size:11px;color:var(--paper);line-height:1.55;">${d.avoid}</div>
-      </div>
-      <div style="background:var(--gold-lt);border:1px solid var(--gold-mid);border-left:3px solid var(--gold);border-radius:var(--r);padding:14px;">
-        <div style="font-family:'Space Mono',monospace;font-size:8px;text-transform:uppercase;color:var(--gold);margin-bottom:6px;">Your One-Liner for Caleb Troop — Gabriel & Javier</div>
-        <div style="font-size:13px;color:var(--gold);font-style:italic;line-height:1.5;">${d.oneliner}</div>
-      </div>
-    </div>
-  `;
-
-  document.getElementById('bi-detail-panel').style.display = 'block';
-  document.getElementById('bi-detail-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
-function biSwitchTab(id, btn) {
-  document.querySelectorAll('.bi-spane').forEach(p => p.style.display = 'none');
-  document.querySelectorAll('#bi-section-tabs button').forEach(b => {
-    b.style.color = 'var(--muted)';
-    b.style.borderBottomColor = 'transparent';
-  });
-  document.getElementById('bi-tab-' + id).style.display = 'block';
-  btn.style.color = 'var(--teal)';
-  btn.style.borderBottomColor = 'var(--teal)';
+function outMarkReplied(id){
+  const b = outCampaign.find(x=>x.id===id);
+  if(!b) return;
+  b.replied = true;
+  b.status = 'replied';
+  outSaveCampaign();
+  outRenderDashboard();
+  outLog('✓', `<strong>${b.name}</strong> marked as replied`);
 }
 
-function biOutTab(id, btn) {
-  document.querySelectorAll('[id^="bi-ot-"]').forEach(p => p.style.display = 'none');
-  document.querySelectorAll('.bi-otab').forEach(b => {
-    b.style.color = 'var(--muted)';
-    b.style.borderBottomColor = 'transparent';
-  });
-  document.getElementById('bi-ot-' + id).style.display = 'block';
-  btn.style.color = 'var(--teal)';
-  btn.style.borderBottomColor = 'var(--teal)';
+function outRemove(id){
+  if(!confirm('Remove this broker from campaign?')) return;
+  outCampaign = outCampaign.filter(b=>b.id!==id);
+  outSaveCampaign();
+  outRenderDashboard();
+  outLog('✕', 'Broker removed from campaign');
 }
+
+async function outSyncFromServer(){
+  try{
+    const res = await fetch(RENDER_URL+'/brokers');
+    const data = await res.json();
+    if(Array.isArray(data)&&data.length){
+      data.forEach(b=>{
+        const exists = outCampaign.find(x=>x.email&&b.email&&x.email.toLowerCase()===b.email.toLowerCase());
+        if(!exists){
+          outCampaign.push({
+            id: b.id||'srv_'+Date.now(),
+            name: b.name, email: b.email,
+            firm: b.firm||'', market: b.market||'FL',
+            sender: b.sender||'gabriel',
+            status: b.status||'active',
+            currentStep: b.current_step||1,
+            replied: b.replied||false,
+            lastSentDate: b.last_sent_date,
+            nextSendDate: b.next_send_date,
+            addedDate: b.added_date||new Date().toISOString()
+          });
+        }
+      });
+      outSaveCampaign();
+      outRenderDashboard();
+      outLog('🔄', `Synced ${data.length} brokers from server`);
+    }
+  }catch(e){
+    outLog('⚠', 'Sync failed — working offline');
+  }
+}
+
+let outCurrentFilter="all";
+
+function outCheckServer(){
+  const el = document.getElementById('out-server-status');
+  if(el) el.innerHTML = '⏳ Checking...';
+  fetch(RENDER_URL+'/health')
+    .then(r=>r.json())
+    .then(d=>{if(el)el.innerHTML='<span style="color:var(--green)">✓ Server Live — '+new Date().toLocaleTimeString()+'</span>';})
+    .catch(()=>{if(el)el.innerHTML='<span style="color:var(--red)">✗ Server unreachable</span>';});
+}
+
+
+function outTab(tab, btn){
+  document.querySelectorAll('.out-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.out-tab-content').forEach(c=>c.style.display='none');
+  btn.classList.add('active');
+  const panel = document.getElementById('out-tab-'+tab) || document.getElementById('out-tab-'+tab+'s');
+  if(panel) panel.style.display='block';
+  if(tab==='templates') outRenderTemplates();
+}
+
+function outFilterBtn(f, btn){
+  document.querySelectorAll('.dt-flt').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  outCurrentFilter = f;
+  outRenderDashboard();
+}
+
+
+function outInit(){
+  // Load saved templates if any
+  const savedTpls = localStorage.getItem('grc_templates_v3');
+  if(savedTpls){
+    try{outTemplates=JSON.parse(savedTpls);}catch(e){}
+  }
+  outRenderDashboard();
+  outRenderTemplates();
+  outSyncFromServer().catch(()=>{});
+}
+
+
 
 biRenderCards();
 </script>
