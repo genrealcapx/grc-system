@@ -546,24 +546,16 @@ td{padding:9px 13px;vertical-align:middle;}
     <div style="font-family:'Space Mono',monospace;font-size:7px;color:#374151;margin-top:20px;">Restricted Access · GRC Internal Use Only</div>
   </div>
 </div>
-
 <script>
-(function(){
-  // Check if already authenticated this session
-  if(sessionStorage.getItem('grc_auth')==='true'){
-    document.getElementById('grc-gate').style.display='none';
-  }
-})();
+(function(){if(sessionStorage.getItem('grc_auth')==='true'){document.getElementById('grc-gate').style.display='none';}})();
 function grcUnlock(){
-  const pw = document.getElementById('grc-pw').value;
-  const err = document.getElementById('grc-pw-err');
-  // Password: GRC2026! — change this anytime
-  if(pw === 'GRC1661!'){
+  const pw=document.getElementById('grc-pw').value;
+  const err=document.getElementById('grc-pw-err');
+  if(pw==='GRC1661!'){
     sessionStorage.setItem('grc_auth','true');
-    const gate = document.getElementById('grc-gate');
-    gate.style.opacity='0';
-    gate.style.transition='opacity .4s';
-    setTimeout(()=>gate.style.display='none', 400);
+    const gate=document.getElementById('grc-gate');
+    gate.style.opacity='0';gate.style.transition='opacity .4s';
+    setTimeout(()=>gate.style.display='none',400);
     err.textContent='';
   } else {
     err.textContent='Incorrect access code. Try again.';
@@ -621,7 +613,6 @@ function grcUnlock(){
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
-  <!-- LOGOUT TOP -->
   <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px 8px;border-bottom:1px solid var(--line);margin-bottom:8px;">
     <div style="font-family:'Cinzel',serif;font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.1em;">GRC</div>
     <button onclick="grcLogout()" style="font-family:'Space Mono',monospace;font-size:7px;font-weight:700;padding:5px 10px;border-radius:var(--r);border:1px solid rgba(239,68,68,.3);background:rgba(239,68,68,.06);color:var(--red);cursor:pointer;letter-spacing:.05em;text-transform:uppercase;">🔒 Log Out</button>
@@ -841,19 +832,8 @@ function grcUnlock(){
 
 <!-- ══ BROKER INTELLIGENCE ══════════════════════ -->
 <div class="pane" id="pane-brokerintel">
-
-  <!-- TAB BAR -->
-  <div style="display:flex;gap:0;border-bottom:2px solid var(--line);margin-bottom:0;">
-    <button id="bi-tab-report" onclick="biMainTab('report')" style="font-family:'Space Mono',monospace;font-size:9px;font-weight:700;padding:10px 22px;background:transparent;border:none;border-bottom:2px solid var(--gold);margin-bottom:-2px;color:var(--gold);cursor:pointer;letter-spacing:.06em;text-transform:uppercase;">📊 Intelligence Report</button>
-    <button id="bi-tab-dossier" onclick="biMainTab('dossier')" style="font-family:'Space Mono',monospace;font-size:9px;font-weight:700;padding:10px 22px;background:transparent;border:none;border-bottom:2px solid transparent;margin-bottom:-2px;color:var(--muted);cursor:pointer;letter-spacing:.06em;text-transform:uppercase;">⬡ Dossier Report</button>
-  </div>
-
-  <!-- PANEL: INTELLIGENCE REPORT -->
-  <div id="bi-panel-report" style="display:block;padding-top:0;">
-      <iframe 
+  <iframe 
     id="bi-iframe"
-    style="width:100%;height:calc(100vh - 120px);min-height:600px;border:none;border-radius:4px;"
-    sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
     srcdoc="<!DOCTYPE html>
 <html lang=&quot;en&quot;>
 <head>
@@ -1470,6 +1450,8 @@ function grcUnlock(){
   <button class=&quot;tab-btn sc&quot; onclick=&quot;switchTab('sc-columbia')&quot;>Columbia SC</button>
   <button class=&quot;tab-btn sc&quot; onclick=&quot;switchTab('sc-charleston')&quot;>Charleston Suburban</button>
   <button class=&quot;tab-btn sc&quot; onclick=&quot;switchTab('sc-myrtle')&quot;>Myrtle Beach</button>
+  <div class=&quot;state-divider&quot;>|</div>
+  <button class=&quot;tab-btn&quot; style=&quot;color:#f0b429;border-bottom-color:transparent&quot; onclick=&quot;switchTab('dossier-troop')&quot; id=&quot;dossier-tab-btn&quot;>⬡ Dossier: Caleb Troop</button>
 </div>
 
 <div class=&quot;main&quot;>
@@ -1545,9 +1527,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Phone (John Currin)</div><div class=&quot;stat-val&quot;>(704) 804-5765</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.northmarq.com/offices/nc/charlotte-nc&quot; target=&quot;_blank&quot;>northmarq.com/charlotte</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Estimated 2022–24 Volume</div><div class=&quot;stat-val&quot;>$2B+ (Carolinas)</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Andrea Howard)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:andrea.howard@northmarq.com&quot; style=&quot;color:#4f7cff;&quot;>andrea.howard@northmarq.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;andrea.howard@northmarq.com&apos;,name:&apos;Andrea Howard&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Allan Lynch)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:allan.lynch@northmarq.com&quot; style=&quot;color:#4f7cff;&quot;>allan.lynch@northmarq.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;allan.lynch@northmarq.com&apos;,name:&apos;Allan Lynch&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:100%&quot;></div></div>
       </div>
     </div>
@@ -1573,9 +1552,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Alex McDermott</div><div class=&quot;stat-val&quot;>LinkedIn: Alex McDermott C&amp;W Charlotte</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://multifamily.cushwake.com&quot; target=&quot;_blank&quot;>multifamily.cushwake.com</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>2024 Sunbelt Group Volume</div><div class=&quot;stat-val&quot;>$4.86B+ (Sunbelt)</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Jordan McCarley)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:jordan.mccarley@cushwake.com&quot; style=&quot;color:#4f7cff;&quot;>jordan.mccarley@cushwake.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;jordan.mccarley@cushwake.com&apos;,name:&apos;Jordan McCarley&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Paul Marley)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:paul.marley@cushwake.com&quot; style=&quot;color:#4f7cff;&quot;>paul.marley@cushwake.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;paul.marley@cushwake.com&apos;,name:&apos;Paul Marley&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:90%&quot;></div></div>
       </div>
     </div>
@@ -1602,9 +1578,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email</div><div class=&quot;stat-val&quot;>berkadia.com/caleb-troop</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.berkadia.com/people-and-locations/locations/charlotte-nc/&quot; target=&quot;_blank&quot;>berkadia.com/charlotte</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Career Volume</div><div class=&quot;stat-val&quot;>$5B+</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Caleb Troop)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:ctroop@berkadia.com&quot; style=&quot;color:#4f7cff;&quot;>ctroop@berkadia.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;ctroop@berkadia.com&apos;,name:&apos;Caleb Troop&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Thomas Colaiezzi)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:tcolaiezzi@berkadia.com&quot; style=&quot;color:#4f7cff;&quot;>tcolaiezzi@berkadia.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;tcolaiezzi@berkadia.com&apos;,name:&apos;Thomas Colaiezzi&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:82%&quot;></div></div>
       </div>
     </div>
@@ -1630,8 +1603,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Charlotte Office</div><div class=&quot;stat-val&quot;>cbre.com/carolina-multifamily</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.cbre.com/offices/corporate/south-carolina&quot; target=&quot;_blank&quot;>cbre.com/carolinas</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Team Combined Volume</div><div class=&quot;stat-val&quot;>$15B+ (Carolinas)</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Tai Cohen)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:tai.cohen@cbre.com&quot; style=&quot;color:#4f7cff;&quot;>tai.cohen@cbre.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;tai.cohen@cbre.com&apos;,name:&apos;Tai Cohen&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:75%&quot;></div></div>
       </div>
     </div>
@@ -1658,11 +1629,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Eric Liebich</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.northmarq.com&quot; target=&quot;_blank&quot;>northmarq.com/eric-liebich</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Career Volume (Corrao)</div><div class=&quot;stat-val&quot;>$4B+ (Carolinas)</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Focus Range</div><div class=&quot;stat-val&quot;>$3M–$50M Private Capital</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Ron Corrao)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:rcorrao@northmarq.com&quot; style=&quot;color:#4f7cff;&quot;>rcorrao@northmarq.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;rcorrao@northmarq.com&apos;,name:&apos;Ron Corrao&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Eric Liebich)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:eliebich@northmarq.com&quot; style=&quot;color:#4f7cff;&quot;>eliebich@northmarq.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;eliebich@northmarq.com&apos;,name:&apos;Eric Liebich&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
-        
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Northmarq Carolinas)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:charlotte@northmarq.com&quot; style=&quot;color:#4f7cff;&quot;>charlotte@northmarq.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;charlotte@northmarq.com&apos;,name:&apos;Northmarq Carolinas&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:68%&quot;></div></div>
       </div>
     </div>
@@ -1688,8 +1654,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.marcusmillichap.com/about-us/offices/charlotteuptown-north-carolina&quot; target=&quot;_blank&quot;>marcusmillichap.com/charlotte</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>National 2024 Volume</div><div class=&quot;stat-val&quot;>~$50B (8,000 deals)</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Deal Sweet Spot</div><div class=&quot;stat-val&quot;>$2M–$20M / 30–150 units</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (M&M Charlotte)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:charlotte@marcusmillichap.com&quot; style=&quot;color:#4f7cff;&quot;>charlotte@marcusmillichap.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;charlotte@marcusmillichap.com&apos;,name:&apos;M&M Charlotte&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:62%&quot;></div></div>
       </div>
     </div>
@@ -1714,12 +1678,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Dane Lozier</div><div class=&quot;stat-val&quot;>(704) 935-7024</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.northmarq.com/offices/nc/charlotte-nc&quot; target=&quot;_blank&quot;>northmarq.com/charlotte</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Focus</div><div class=&quot;stat-val&quot;>Private Capital Value-Add Carolinas</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Matthew Weinstein)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:matthew.weinstein@northmarq.com&quot; style=&quot;color:#4f7cff;&quot;>matthew.weinstein@northmarq.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;matthew.weinstein@northmarq.com&apos;,name:&apos;Matthew Weinstein&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Dane Lozier)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:dane.lozier@northmarq.com&quot; style=&quot;color:#4f7cff;&quot;>dane.lozier@northmarq.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;dane.lozier@northmarq.com&apos;,name:&apos;Dane Lozier&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
-        
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Matthew Weinstein)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:matthew.weinstein@northmarq.com&quot; style=&quot;color:#4f7cff;&quot;>matthew.weinstein@northmarq.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;matthew.weinstein@northmarq.com&apos;,name:&apos;Matthew Weinstein&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Dane Lozier)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:dane.lozier@northmarq.com&quot; style=&quot;color:#4f7cff;&quot;>dane.lozier@northmarq.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;dane.lozier@northmarq.com&apos;,name:&apos;Dane Lozier&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:50%&quot;></div></div>
       </div>
     </div>
@@ -1743,8 +1701,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>National 2024 Volume</div><div class=&quot;stat-val&quot;>$5.6B Multifamily</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.colliers.com/en/united-states/cities/charlotte&quot; target=&quot;_blank&quot;>colliers.com/charlotte</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>SC Contact</div><div class=&quot;stat-val&quot;>Brantley Anderson (864) 527-5440</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Colliers Carolinas)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:charlotte@colliers.com&quot; style=&quot;color:#4f7cff;&quot;>charlotte@colliers.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;charlotte@colliers.com&apos;,name:&apos;Colliers Carolinas&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:40%&quot;></div></div>
       </div>
     </div>
@@ -1816,8 +1772,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Career Volume</div><div class=&quot;stat-val&quot;>$5.5B+</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.northmarq.com&quot; target=&quot;_blank&quot;>northmarq.com/raleigh</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>NC Lic.</div><div class=&quot;stat-val&quot;>Licensed NC &amp;amp; SC</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Jeff Glenn)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:jeff.glenn@cbre.com&quot; style=&quot;color:#4f7cff;&quot;>jeff.glenn@cbre.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;jeff.glenn@cbre.com&apos;,name:&apos;Jeff Glenn&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:100%&quot;></div></div>
       </div>
     </div>
@@ -1836,8 +1790,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Travis Cundiff Email</div><div class=&quot;stat-val&quot;>tcundiff@northmarq.com</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.northmarq.com&quot; target=&quot;_blank&quot;>northmarq.com/raleigh</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Focus Range</div><div class=&quot;stat-val&quot;>$3M–$25M Private Capital</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Travis Cundiff)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:tcundiff@berkadia.com&quot; style=&quot;color:#4f7cff;&quot;>tcundiff@berkadia.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;tcundiff@berkadia.com&apos;,name:&apos;Travis Cundiff&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:82%&quot;></div></div>
       </div>
     </div>
@@ -1856,8 +1808,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Carolinas HQ</div><div class=&quot;stat-val&quot;>Charlotte, NC</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://multifamily.cushwake.com/Offices/Charlotte&quot; target=&quot;_blank&quot;>multifamily.cushwake.com/Charlotte</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Notable RDU Deal</div><div class=&quot;stat-val&quot;>Ardmore Cates Creek (627 units)</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (C&W Sunbelt Raleigh)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:multifamily.cushwake.com&quot; style=&quot;color:#4f7cff;&quot;>multifamily.cushwake.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;multifamily.cushwake.com&apos;,name:&apos;C&W Sunbelt Raleigh&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:72%&quot;></div></div>
       </div>
     </div>
@@ -1876,8 +1826,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Raleigh Office</div><div class=&quot;stat-val&quot;>berkadia.com/raleigh-nc</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.berkadia.com/people-and-locations/locations/raleigh-nc/&quot; target=&quot;_blank&quot;>berkadia.com/raleigh</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Integrated Platform</div><div class=&quot;stat-val&quot;>Fannie / Freddie / HUD</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Berkadia Raleigh)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:raleigh@berkadia.com&quot; style=&quot;color:#4f7cff;&quot;>raleigh@berkadia.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;raleigh@berkadia.com&apos;,name:&apos;Berkadia Raleigh&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:62%&quot;></div></div>
       </div>
     </div>
@@ -1895,8 +1843,6 @@ function grcUnlock(){
       <div class=&quot;broker-stats&quot;>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Raleigh Office</div><div class=&quot;stat-val&quot;>cbre.com/raleigh</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.cbre.com/offices/corporate/raleigh&quot; target=&quot;_blank&quot;>cbre.com/raleigh</a></div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (CBRE Raleigh)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:raleigh.multifamily@cbre.com&quot; style=&quot;color:#4f7cff;&quot;>raleigh.multifamily@cbre.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;raleigh.multifamily@cbre.com&apos;,name:&apos;CBRE Raleigh&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:55%&quot;></div></div>
       </div>
     </div>
@@ -1915,8 +1861,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Raleigh Office</div><div class=&quot;stat-val&quot;>marcusmillichap.com/raleigh</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.marcusmillichap.com/about-us/offices/raleigh-north-carolina&quot; target=&quot;_blank&quot;>marcusmillichap.com/raleigh</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Deal Sweet Spot</div><div class=&quot;stat-val&quot;>$2M–$15M / 40–120 units</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (M&M Raleigh)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:raleigh@marcusmillichap.com&quot; style=&quot;color:#4f7cff;&quot;>raleigh@marcusmillichap.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;raleigh@marcusmillichap.com&apos;,name:&apos;M&M Raleigh&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:44%&quot;></div></div>
       </div>
     </div>
@@ -2005,8 +1949,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Columbia SC Office</div><div class=&quot;stat-val&quot;>marcusmillichap.com/columbia-sc</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Notable Sale</div><div class=&quot;stat-val&quot;>Hemingway Apts, Conway SC ($4.1M)</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.marcusmillichap.com/about-us/offices/columbia-south-carolina&quot; target=&quot;_blank&quot;>marcusmillichap.com/columbia-sc</a></div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (M&M Columbia SC)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:columbia@marcusmillichap.com&quot; style=&quot;color:#4f7cff;&quot;>columbia@marcusmillichap.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;columbia@marcusmillichap.com&apos;,name:&apos;M&M Columbia SC&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:72%&quot;></div></div>
       </div>
     </div>
@@ -2042,8 +1984,6 @@ function grcUnlock(){
       <div class=&quot;broker-stats&quot;>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Contact</div><div class=&quot;stat-val&quot;>Caleb Troop: (980) 208-1668</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.berkadia.com/people-and-locations/locations/charlotte-nc/&quot; target=&quot;_blank&quot;>berkadia.com/charlotte</a></div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Berkadia Carolinas)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:charlotte@berkadia.com&quot; style=&quot;color:#4f7cff;&quot;>charlotte@berkadia.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;charlotte@berkadia.com&apos;,name:&apos;Berkadia Carolinas&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:48%&quot;></div></div>
       </div>
     </div>
@@ -2255,9 +2195,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Notable SC Deal</div><div class=&quot;stat-val&quot;>8-Property SC Portfolio (2,164 units)</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.berkadia.com/people-and-locations/locations/southeast/&quot; target=&quot;_blank&quot;>berkadia.com/southeast</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Career Volume</div><div class=&quot;stat-val&quot;>$5B+ (Carolinas)</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Caleb Troop)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:ctroop@berkadia.com&quot; style=&quot;color:#4f7cff;&quot;>ctroop@berkadia.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;ctroop@berkadia.com&apos;,name:&apos;Caleb Troop&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Thomas Colaiezzi)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:tcolaiezzi@berkadia.com&quot; style=&quot;color:#4f7cff;&quot;>tcolaiezzi@berkadia.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;tcolaiezzi@berkadia.com&apos;,name:&apos;Thomas Colaiezzi&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:100%&quot;></div></div>
       </div>
     </div>
@@ -2293,8 +2230,6 @@ function grcUnlock(){
       <div class=&quot;broker-stats&quot;>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Notable SC Deals</div><div class=&quot;stat-val&quot;>NOVO Mauldin ($81.5M), Braxton at Woods Lake (232u), Mauldin Heights (130u)</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://multifamily.cushwake.com/Offices/Charlotte&quot; target=&quot;_blank&quot;>multifamily.cushwake.com/Charlotte</a></div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (C&W Sunbelt Charlotte)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:multifamily@cushwake.com&quot; style=&quot;color:#4f7cff;&quot;>multifamily@cushwake.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;multifamily@cushwake.com&apos;,name:&apos;C&W Sunbelt Charlotte&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:80%&quot;></div></div>
       </div>
     </div>
@@ -2313,8 +2248,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Brantley Anderson</div><div class=&quot;stat-val&quot;>(864) 527-5440</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Address</div><div class=&quot;stat-val&quot;>32 E. Broad St., Greenville SC 29601</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.colliers.com/en/united-states/cities/greenville&quot; target=&quot;_blank&quot;>colliers.com/greenville</a></div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Colliers Greenville)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:greenville@colliers.com&quot; style=&quot;color:#4f7cff;&quot;>greenville@colliers.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;greenville@colliers.com&apos;,name:&apos;Colliers Greenville&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:65%&quot;></div></div>
       </div>
     </div>
@@ -2437,8 +2370,6 @@ function grcUnlock(){
       <div class=&quot;broker-stats&quot;>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Contact</div><div class=&quot;stat-val&quot;>Caleb Troop: (980) 208-1668</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.berkadia.com/people-and-locations/locations/southeast/&quot; target=&quot;_blank&quot;>berkadia.com/southeast</a></div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Caleb Troop)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:ctroop@berkadia.com&quot; style=&quot;color:#4f7cff;&quot;>ctroop@berkadia.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;ctroop@berkadia.com&apos;,name:&apos;Caleb Troop&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:82%&quot;></div></div>
       </div>
     </div>
@@ -2457,8 +2388,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>SC President</div><div class=&quot;stat-val&quot;>Brantley Anderson</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Greenville HQ Phone</div><div class=&quot;stat-val&quot;>(864) 527-5440</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.colliers.com/en/united-states/cities/greenville&quot; target=&quot;_blank&quot;>colliers.com/SC</a></div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Colliers SC Columbia)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:columbia@colliers.com&quot; style=&quot;color:#4f7cff;&quot;>columbia@colliers.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;columbia@colliers.com&apos;,name:&apos;Colliers SC Columbia&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:65%&quot;></div></div>
       </div>
     </div>
@@ -2476,8 +2405,6 @@ function grcUnlock(){
       <div class=&quot;broker-stats&quot;>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>SC License (Caylor Mark)</div><div class=&quot;stat-val&quot;>SC #116563</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.northmarq.com&quot; target=&quot;_blank&quot;>northmarq.com</a></div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Northmarq SC)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:charlotte@northmarq.com&quot; style=&quot;color:#4f7cff;&quot;>charlotte@northmarq.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;charlotte@northmarq.com&apos;,name:&apos;Northmarq SC&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:55%&quot;></div></div>
       </div>
     </div>
@@ -2585,8 +2512,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>John Phoenix (SC Lic.)</div><div class=&quot;stat-val&quot;>SC #109906</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Kevin Kempf (SC Lic.)</div><div class=&quot;stat-val&quot;>SC #86974</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.cbre.com/offices/corporate/south-carolina&quot; target=&quot;_blank&quot;>cbre.com/SC</a></div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Tai Cohen)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:tai.cohen@cbre.com&quot; style=&quot;color:#4f7cff;&quot;>tai.cohen@cbre.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;tai.cohen@cbre.com&apos;,name:&apos;Tai Cohen&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:88%&quot;></div></div>
       </div>
     </div>
@@ -2605,8 +2530,6 @@ function grcUnlock(){
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Charleston SC Office</div><div class=&quot;stat-val&quot;>marcusmillichap.com/charleston-sc</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.marcusmillichap.com/about-us/offices/charleston-south-carolina&quot; target=&quot;_blank&quot;>marcusmillichap.com/charleston</a></div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Deal Sweet Spot</div><div class=&quot;stat-val&quot;>$3M–$20M / 40–150 units</div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (M&M Charleston)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:charleston@marcusmillichap.com&quot; style=&quot;color:#4f7cff;&quot;>charleston@marcusmillichap.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;charleston@marcusmillichap.com&apos;,name:&apos;M&M Charleston&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:72%&quot;></div></div>
       </div>
     </div>
@@ -2641,8 +2564,6 @@ function grcUnlock(){
       <div class=&quot;broker-stats&quot;>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Charleston Office</div><div class=&quot;stat-val&quot;>colliers.com/charleston</div></div>
         <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Website</div><div class=&quot;stat-val&quot;><a href=&quot;https://www.colliers.com/en/united-states/cities/charleston&quot; target=&quot;_blank&quot;>colliers.com/charleston-SC</a></div></div>
-        <div 
-        <div class=&quot;stat-row&quot;><div class=&quot;stat-label&quot;>Email (Colliers Charleston)</div><div class=&quot;stat-val&quot;><a href=&quot;mailto:charleston@colliers.com&quot; style=&quot;color:#4f7cff;&quot;>charleston@colliers.com</a><button style=&quot;font-family:monospace;font-size:8px;font-weight:700;padding:3px 9px;border-radius:3px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:#22c55e;cursor:pointer;margin-left:8px;vertical-align:middle;&quot; onclick=&quot;window.parent.postMessage({type:&apos;addToDir&apos;,email:&apos;charleston@colliers.com&apos;,name:&apos;Colliers Charleston&apos;},&apos;*&apos;)&quot;>&rarr; Directory</button></div></div>
         <div class=&quot;vol-bar-bg&quot;><div class=&quot;vol-bar&quot; style=&quot;width:45%&quot;></div></div>
       </div>
     </div>
@@ -3379,49 +3300,21 @@ function switchOutreach(id, btn) {
 </script>
 
 <script>
-// ── AUTO LOGOUT — 15 min inactivity ──
 (function(){
-  const TIMEOUT = 15 * 60 * 1000; // 15 minutes
-  let timer;
-  let warningTimer;
-
-  function resetTimer(){
-    clearTimeout(timer);
-    clearTimeout(warningTimer);
-    // Show 1 min warning at 14 minutes
-    warningTimer = setTimeout(()=>{
-      if(sessionStorage.getItem('grc_auth')==='true'){
-        const banner = document.getElementById('grc-timeout-warning');
-        if(banner) banner.style.display='flex';
-      }
-    }, 14 * 60 * 1000);
-    // Auto logout at 15 minutes
-    timer = setTimeout(()=>{
-      if(sessionStorage.getItem('grc_auth')==='true'){
-        sessionStorage.removeItem('grc_auth');
-        location.reload();
-      }
-    }, TIMEOUT);
+  const TIMEOUT=15*60*1000;
+  let timer,warnTimer;
+  function reset(){
+    clearTimeout(timer);clearTimeout(warnTimer);
+    warnTimer=setTimeout(()=>{if(sessionStorage.getItem('grc_auth')==='true'){const b=document.getElementById('grc-timeout-warning');if(b)b.style.display='flex';}},14*60*1000);
+    timer=setTimeout(()=>{if(sessionStorage.getItem('grc_auth')==='true'){sessionStorage.removeItem('grc_auth');location.reload();}},TIMEOUT);
   }
-
-  // Reset timer on any user activity
-  ['mousedown','mousemove','keydown','scroll','touchstart','click'].forEach(evt=>{
-    document.addEventListener(evt, ()=>{
-      const banner = document.getElementById('grc-timeout-warning');
-      if(banner) banner.style.display='none';
-      resetTimer();
-    }, true);
-  });
-
-  // Start timer on load
-  resetTimer();
+  ['mousedown','mousemove','keydown','scroll','touchstart','click'].forEach(e=>{document.addEventListener(e,()=>{const b=document.getElementById('grc-timeout-warning');if(b)b.style.display='none';reset();},true);});
+  reset();
 })();
 </script>
-
-<!-- TIMEOUT WARNING BANNER -->
 <div id="grc-timeout-warning" style="display:none;position:fixed;bottom:20px;right:20px;z-index:9998;background:#1a1e28;border:1px solid rgba(245,158,11,.4);border-radius:8px;padding:14px 18px;font-family:'Space Mono',monospace;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,.4);">
-  <span style="font-size:10px;color:var(--amber);">⚠ Session expiring in 1 minute</span>
-  <button onclick="document.getElementById('grc-timeout-warning').style.display='none'" style="font-size:7px;padding:4px 10px;border-radius:4px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.1);color:var(--amber);cursor:pointer;font-family:'Space Mono',monospace;">Stay Logged In</button>
+  <span style="font-size:10px;color:#f59e0b;">⚠ Session expiring in 1 minute</span>
+  <button onclick="document.getElementById('grc-timeout-warning').style.display='none'" style="font-size:7px;padding:4px 10px;border-radius:4px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.1);color:#f59e0b;cursor:pointer;font-family:'Space Mono',monospace;">Stay Logged In</button>
 </div>
 </body>
 </html>
@@ -3429,16 +3322,6 @@ function switchOutreach(id, btn) {
     style="width:100%;height:calc(100vh - 0px);border:none;display:block;"
     title="GRC Broker Intelligence Report">
   </iframe>
-  </div>
-
-  <!-- PANEL: DOSSIER -->
-  <div id="bi-panel-dossier" style="display:none;padding-top:20px;">
-    <div id="bi-cards-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-bottom:16px;"></div>
-    <div id="bi-detail-panel" style="display:none;">
-      <div id="bi-detail-content"></div>
-    </div>
-  </div>
-
 </div>
 
 <!-- ══ BROKER DIRECTORY ══════════════════════════ -->
@@ -4468,6 +4351,39 @@ function sortTable(c,th){
 }
 
 /* ── NOI WALKDOWN ── */
+function renderNOI(){
+  const g=document.getElementById('noi-grid-full');
+  g.innerHTML='';
+  const sorted=[...MARKETS].sort((a,b)=>b.score-a.score);
+  sorted.forEach(m=>{
+    const units=100,rent=m.rentAvg;
+    const gpr=rent*units*12;
+    const vacRate=m.capNow?.08:.09;
+    const egi=Math.round(gpr*(1-vacRate));
+    const opex=Math.round(egi*m.opex);
+    const noi=egi-opex;
+    const pp=m.ppu*units;
+    const cap=((noi/pp)*100).toFixed(2);
+    const v=parseFloat(cap)>=6.5?'p':parseFloat(cap)>=5.75?'s':'n';
+    const vl=v==='p'?`✓ PENCILS @ ${cap}%`:v==='s'?`~ STRETCH @ ${cap}%`:`✗ NO @ ${cap}%`;
+    const div=document.createElement('div');
+    div.className='noi-c';
+    div.innerHTML=`
+      <div class="noi-c-hdr">
+        <div class="noi-c-name">${m.name}</div>
+        <span class="noi-c-verdict nv-${v}">${vl}</span>
+      </div>
+      <div class="noi-row"><span class="noi-lbl">GPR (${units}u × $${rent} × 12)</span><span class="noi-val">$${(gpr/1000).toFixed(0)}K</span></div>
+      <div class="noi-row"><span class="noi-lbl">Vacancy (${Math.round(vacRate*100)}%)</span><span class="noi-val" style="color:var(--red)">−$${(gpr*vacRate/1000).toFixed(0)}K</span></div>
+      <div class="noi-row"><span class="noi-lbl">EGI</span><span class="noi-val">$${(egi/1000).toFixed(0)}K</span></div>
+      <div class="noi-row"><span class="noi-lbl">OpEx (${Math.round(m.opex*100)}% ${m.state==='tx'?'TX+tax':''})</span><span class="noi-val" style="color:var(--red)">−$${(opex/1000).toFixed(0)}K</span></div>
+      <div class="noi-row noi-total"><span class="noi-lbl">NOI</span><span class="noi-val">$${(noi/1000).toFixed(0)}K</span></div>
+      <div class="noi-row"><span class="noi-lbl">Purchase ($${Math.round(m.ppu/1000)}K × 100)</span><span class="noi-val">$${(pp/1e6).toFixed(1)}M</span></div>
+      <div class="noi-row noi-cap-row"><span class="noi-lbl">Going-in cap</span><span class="noi-val" style="color:${v==='p'?'var(--green)':v==='s'?'var(--amber)':'var(--red)'}">${cap}%</span></div>
+      <div style="font-size:9px;color:var(--muted);margin-top:7px;border-top:1px dashed var(--line);padding-top:7px;font-family:'Space Mono',monospace">${m.rentFcst} · ${m.hhIncome} · ${m.stateLabel}</div>`;
+    g.appendChild(div);
+  });
+}
 
 /* ── BROKER DIRECTORY ── */
 function filterBrokers(f,btn){ brokerFilter=f; document.querySelectorAll('#pane-brokers .fb').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); renderBrokers(); }
@@ -4476,10 +4392,7 @@ function searchBrokers(v){ brokerSearch=v.toLowerCase(); renderBrokers(); }
 /* ── BROKER STORAGE ── */
 let customBrokers=[];
 try{customBrokers=JSON.parse(localStorage.getItem('grc-v2-brokers')||'[]');}catch(e){}
-function saveBrokers(){try{localStorage.setItem('grc-v2-brokers',JSON.stringify(customBrokers));}catch(e){}
-  // Sync to Render database
-  customBrokers.filter(b=>!b.deleted).forEach(b=>{ if(typeof syncDirectoryToServer==='function') syncDirectoryToServer(b).catch(()=>{}); });
-}
+function saveBrokers(){try{localStorage.setItem('grc-v2-brokers',JSON.stringify(customBrokers));}catch(e){}}
 
 function getAllBrokers(){
   const all=[...BROKERS.map(b=>({...b,monitored:b.monitored!==false,source:'system'}))];
@@ -5226,10 +5139,7 @@ const DT_STAGES=['reviewing','underwriting','loi','hot','passed'];
 const DT_STAGE_LABELS={reviewing:'Reviewing',underwriting:'Underwriting',loi:'LOI Ready',hot:'🔥 Hot',passed:'Passed'};
 const DT_STAGE_COLORS={reviewing:'#60a5fa',underwriting:'#f59e0b',loi:'#2dd4bf',hot:'#ef4444',passed:'#6b7280'};
 let dtDeals=[];try{dtDeals=JSON.parse(localStorage.getItem('grc-v2-dt')||'[]');}catch(e){}
-function dtSave(){try{localStorage.setItem('grc-v2-dt',JSON.stringify(dtDeals));}catch(e){}
-  // Sync deals to Render
-  if(typeof dtDeals!=='undefined') dtDeals.forEach(d=>{ if(typeof syncDealToServer==='function') syncDealToServer(d).catch(()=>{}); });
-}
+function dtSave(){try{localStorage.setItem('grc-v2-dt',JSON.stringify(dtDeals));}catch(e){}}
 let dtCurrentFilter='all',dtCurrentSearch='',dtOpenDealId=null;
 function dtScoreBuyBox(d){
   let score=0,max=0,flags=[];
@@ -6503,29 +6413,41 @@ function outPreviewNext(id){
 
 /* ── SEND NOW (simulation — real send goes through Render server) ── */
 async function outSendNow(id){
-  const b=outCampaign.find(x=>x.id===id);if(!b)return;
+  const b=outCampaign.find(x=>x.id===id);
+  if(!b){alert('Broker not found in campaign. Please re-add the broker.');return;}
   if(b.status==='replied'||b.status==='completed'){alert('This broker has already replied or completed the sequence.');return;}
 
   const btn=document.querySelector(`button[onclick="outSendNow('${id}')"]`);
   if(btn){btn.textContent='⏳ Sending...';btn.disabled=true;}
 
   try{
-    // First make sure broker exists on server
-    await apiCall('POST','/brokers',{
-      id:b.id,name:b.name,email:b.email,firm:b.firm||'',
-      market:b.market||'FL',sender:b.sender||'gabriel',
-      status:'active',currentStep:b.currentStep,
-      nextSendDate:new Date().toISOString(),notes:b.notes||''
+    // Save broker to server with correct format matching database schema
+    const saveRes = await apiCall('POST','/brokers',{
+      id: b.id,
+      name: b.name,
+      email: b.email,
+      firm: b.firm||'',
+      market: b.market||'FL',
+      sender: b.sender||'gabriel',
+      status: 'active',
+      currentStep: b.currentStep||1,
+      nextSendDate: new Date().toISOString(),
+      notes: b.notes||''
     });
 
-    // Now trigger instant send
+    if(!saveRes){
+      throw new Error('Could not save broker to server');
+    }
+
+    // Small delay to ensure save completes
+    await new Promise(r=>setTimeout(r,500));
+
+    // Trigger send
     const res=await apiCall('POST','/send-now',{brokerId:b.id});
 
-    if(res.success){
+    if(res&&res.success){
       const senderEmail=b.sender==='javier'?outSettings.javierEmail:outSettings.gabrielEmail;
       outLog('📧',`Email ${b.currentStep} sent to <strong>${b.name}</strong> &lt;${b.email}&gt; from ${senderEmail} ✓`);
-
-      // Advance local state
       b.lastSentDate=new Date().toISOString();
       if(b.currentStep>=4){b.status='completed';b.nextSendDate=null;}
       else{
@@ -6538,12 +6460,13 @@ async function outSendNow(id){
       if(btn){btn.textContent='✓ Sent!';setTimeout(()=>{btn.textContent='▶ Send Now';btn.disabled=false;},3000);}
       alert('✓ Email sent successfully!\n\nCheck your Outlook Sent folder to confirm.');
     } else {
+      const errMsg=res?.error||'Unknown error';
       if(btn){btn.textContent='▶ Send Now';btn.disabled=false;}
-      alert('Send failed: '+(res.error||'Unknown error')+'\n\nCheck Render logs for details.');
+      alert('Send failed: '+errMsg+'\n\nCheck Render logs for details.');
     }
   }catch(err){
     if(btn){btn.textContent='▶ Send Now';btn.disabled=false;}
-    alert('Connection error: '+err.message);
+    alert('Error: '+err.message);
   }
 }
 /* ── TEMPLATES ── */
@@ -6874,22 +6797,9 @@ let biActiveId = null;
 let biActiveOutreachTab = 'email';
 
 function grcLogout(){
-  if(!confirm('Lock the GRC system? You will need to enter the access code to get back in.')) return;
+  if(!confirm('Lock the GRC system? You will need to enter the access code to get back in.'))return;
   sessionStorage.removeItem('grc_auth');
   location.reload();
-}
-
-function biMainTab(tab){
-  const isReport=tab==='report';
-  document.getElementById('bi-panel-report').style.display=isReport?'block':'none';
-  document.getElementById('bi-panel-dossier').style.display=isReport?'none':'block';
-  const r=document.getElementById('bi-tab-report');
-  const d=document.getElementById('bi-tab-dossier');
-  r.style.borderBottomColor=isReport?'var(--gold)':'transparent';
-  r.style.color=isReport?'var(--gold)':'var(--muted)';
-  d.style.borderBottomColor=isReport?'transparent':'var(--gold)';
-  d.style.color=isReport?'var(--muted)':'var(--gold)';
-  if(!isReport)biRenderCards();
 }
 
 function biRenderCards() {
@@ -7126,271 +7036,25 @@ function biOutTab(id, btn) {
   btn.style.borderBottomColor = 'var(--teal)';
 }
 
-// → Directory button from Broker Intelligence iframe
-window.addEventListener('message', function(e){
-  if(!e.data||e.data.type!=='addToDir')return;
-  const email=e.data.email, name=e.data.name;
-  if(!email||!name)return;
-  const all=getAllBrokers();
-  if(all.find(b=>b.email&&b.email.toLowerCase()===email.toLowerCase())){
-    alert(name+' is already in your Broker Directory.');return;
-  }
-  const em=email.toLowerCase();
-  let firm='Unknown';
-  if(em.includes('northmarq'))firm='Northmarq';
-  else if(em.includes('cushwake'))firm='Cushman & Wakefield';
-  else if(em.includes('cbre'))firm='CBRE';
-  else if(em.includes('berkadia'))firm='Berkadia';
-  else if(em.includes('marcusmillichap'))firm='Marcus & Millichap';
-  else if(em.includes('colliers'))firm='Colliers';
-  const mkts=['nc','sc'];
-  customBrokers.push({
-    id:'bi_dir_'+Date.now(),name,email,firm,
-    firmCat:em.includes('northmarq')?'northmarq':em.includes('cbre')?'cbre':em.includes('berkadia')?'berkadia':em.includes('marcusmillichap')?'mm':'other',
-    phone:'',specialty:'Added from Broker Intelligence Report',
-    mkts,markets:mkts.map(m=>m.toUpperCase()),monitored:true,source:'custom'
-  });
-  saveBrokers();
-  alert('✓ '+name+' added to Broker Directory!\n\nEmail: '+email+'\nMonitor: ON');
-});
-
-
-/* ══════════════════════════════════════════════════
-   GRC SHARED DATA SYNC — Render Database
-   All data syncs between Gabriel & Javier in real time
-══════════════════════════════════════════════════ */
-
-async function apiCall(method, path, data) {
-  try {
-    const opts = {
-      method,
-      headers: { 'Content-Type': 'application/json' },
-    };
-    if (data && method !== 'GET') opts.body = JSON.stringify(data);
-    const res = await fetch(RENDER_API + path, opts);
-    return await res.json();
-  } catch(e) {
-    console.error('API error:', e.message);
-    return null;
-  }
-}
-
-/* ── BROKER DIRECTORY SYNC ── */
-async function syncDirectoryToServer(broker) {
-  await apiCall('POST', '/directory', {
-    id: broker.id || 'dir_' + Date.now(),
-    name: broker.name,
-    email: broker.email || '',
-    firm: broker.firm || '',
-    firmCat: broker.firmCat || 'other',
-    phone: broker.phone || '',
-    specialty: broker.specialty || '',
-    markets: broker.markets || [],
-    monitored: broker.monitored !== false,
-    source: broker.source || 'custom'
-  });
-}
-
-async function loadDirectoryFromServer() {
-  const data = await apiCall('GET', '/directory');
-  if (!data || !Array.isArray(data)) return;
-  // Merge server data into customBrokers
-  data.forEach(b => {
-    const exists = customBrokers.find(c => c.email && b.email && c.email.toLowerCase() === b.email.toLowerCase());
-    if (!exists) {
-      customBrokers.push({
-        id: b.id, name: b.name, email: b.email, firm: b.firm,
-        firmCat: b.firm_cat, phone: b.phone, specialty: b.specialty,
-        markets: b.markets || [], monitored: b.monitored, source: 'custom'
-      });
-    }
-  });
-  saveBrokers();
-  renderBrokers();
-}
-
-/* ── DEAL TRACKER SYNC ── */
-async function syncDealToServer(deal) {
-  await apiCall('POST', '/deals', {
-    id: deal.id,
-    name: deal.name || deal.propName || '',
-    address: deal.address || '',
-    market: deal.market || 'FL',
-    units: deal.units || 0,
-    price: deal.price || deal.askPrice || 0,
-    pricePerUnit: deal.pricePerUnit || deal.ppu || 0,
-    yearBuilt: deal.yearBuilt || deal.yrBuilt || 0,
-    capRate: deal.capRate || deal.goingInCap || 0,
-    status: deal.status || 'screening',
-    assetClass: deal.assetClass || deal.cls || 'B',
-    brokerName: deal.brokerName || deal.broker || '',
-    brokerEmail: deal.brokerEmail || '',
-    notes: deal.notes || ''
-  });
-}
-
-async function loadDealsFromServer() {
-  const data = await apiCall('GET', '/deals');
-  if (!data || !Array.isArray(data)) return;
-  // Merge into local deals array
-  if (typeof dtDeals !== 'undefined') {
-    data.forEach(d => {
-      const exists = dtDeals.find(x => x.id === d.id);
-      if (!exists) {
-        dtDeals.push({
-          id: d.id, propName: d.name, address: d.address,
-          market: d.market, units: d.units, askPrice: d.price,
-          ppu: d.price_per_unit, yrBuilt: d.year_built,
-          goingInCap: d.cap_rate, status: d.status,
-          cls: d.asset_class, broker: d.broker_name,
-          brokerEmail: d.broker_email, notes: d.notes,
-          added: d.added_date
-        });
-      }
-    });
-    localStorage.setItem('grc_dt_deals', JSON.stringify(dtDeals));
-    dtRenderDashboard();
-  }
-}
-
-/* ── COMP SALES SYNC ── */
-async function syncCompToServer(comp) {
-  await apiCall('POST', '/comps', {
-    id: comp.id,
-    propertyName: comp.name || '',
-    address: comp.address || '',
-    market: comp.market || 'FL',
-    units: comp.units || 0,
-    salePrice: comp.price || 0,
-    pricePerUnit: comp.ppu || 0,
-    capRate: comp.cap || 0,
-    yearBuilt: comp.yr || 0,
-    saleDate: comp.date || null,
-    notes: comp.notes || ''
-  });
-}
-
-async function loadCompsFromServer() {
-  const data = await apiCall('GET', '/comps');
-  if (!data || !Array.isArray(data)) return;
-  if (typeof comps !== 'undefined') {
-    data.forEach(c => {
-      const exists = comps.find(x => x.id === c.id);
-      if (!exists) {
-        comps.push({
-          id: c.id, name: c.property_name, address: c.address,
-          market: c.market, units: c.units, price: c.sale_price,
-          ppu: c.price_per_unit, cap: c.cap_rate, yr: c.year_built,
-          date: c.sale_date, notes: c.notes
-        });
-      }
-    });
-    saveComps();
-    renderComps();
-  }
-}
-
-/* ── INSURANCE SYNC ── */
-async function syncInsuranceToServer(ins) {
-  await apiCall('POST', '/insurance', {
-    id: ins.id,
-    propertyName: ins.name || '',
-    market: ins.market || 'FL',
-    units: ins.units || 0,
-    carrier: ins.carrier || '',
-    annualPremium: ins.premium || 0,
-    perUnit: ins.perUnit || 0,
-    coverageAmount: ins.coverage || 0,
-    deductible: ins.deductible || 0,
-    expiryDate: ins.expiry || null,
-    notes: ins.notes || ''
-  });
-}
-
-async function loadInsuranceFromServer() {
-  const data = await apiCall('GET', '/insurance');
-  if (!data || !Array.isArray(data)) return;
-  if (typeof insData !== 'undefined') {
-    data.forEach(i => {
-      const exists = insData.find(x => x.id === i.id);
-      if (!exists) {
-        insData.push({
-          id: i.id, name: i.property_name, market: i.market,
-          units: i.units, carrier: i.carrier, premium: i.annual_premium,
-          perUnit: i.per_unit, coverage: i.coverage_amount,
-          deductible: i.deductible, expiry: i.expiry_date, notes: i.notes
-        });
-      }
-    });
-    saveIns();
-    renderIns();
-  }
-}
-
-/* ── INIT ALL SYNC ── */
-async function initSharedSync() {
-  console.log('🔄 Syncing with GRC database...');
-  await Promise.all([
-    loadDirectoryFromServer(),
-    loadDealsFromServer(),
-    loadCompsFromServer(),
-    loadInsuranceFromServer(),
-  ]);
-  console.log('✓ All data synced');
-}
-
-// Auto-sync every 60 seconds
-setInterval(initSharedSync, 60000);
-
-
-initSharedSync().catch(()=>{});
 biRenderCards();
 </script>
 
 <script>
-// ── AUTO LOGOUT — 15 min inactivity ──
 (function(){
-  const TIMEOUT = 15 * 60 * 1000; // 15 minutes
-  let timer;
-  let warningTimer;
-
-  function resetTimer(){
-    clearTimeout(timer);
-    clearTimeout(warningTimer);
-    // Show 1 min warning at 14 minutes
-    warningTimer = setTimeout(()=>{
-      if(sessionStorage.getItem('grc_auth')==='true'){
-        const banner = document.getElementById('grc-timeout-warning');
-        if(banner) banner.style.display='flex';
-      }
-    }, 14 * 60 * 1000);
-    // Auto logout at 15 minutes
-    timer = setTimeout(()=>{
-      if(sessionStorage.getItem('grc_auth')==='true'){
-        sessionStorage.removeItem('grc_auth');
-        location.reload();
-      }
-    }, TIMEOUT);
+  const TIMEOUT=15*60*1000;
+  let timer,warnTimer;
+  function reset(){
+    clearTimeout(timer);clearTimeout(warnTimer);
+    warnTimer=setTimeout(()=>{if(sessionStorage.getItem('grc_auth')==='true'){const b=document.getElementById('grc-timeout-warning');if(b)b.style.display='flex';}},14*60*1000);
+    timer=setTimeout(()=>{if(sessionStorage.getItem('grc_auth')==='true'){sessionStorage.removeItem('grc_auth');location.reload();}},TIMEOUT);
   }
-
-  // Reset timer on any user activity
-  ['mousedown','mousemove','keydown','scroll','touchstart','click'].forEach(evt=>{
-    document.addEventListener(evt, ()=>{
-      const banner = document.getElementById('grc-timeout-warning');
-      if(banner) banner.style.display='none';
-      resetTimer();
-    }, true);
-  });
-
-  // Start timer on load
-  resetTimer();
+  ['mousedown','mousemove','keydown','scroll','touchstart','click'].forEach(e=>{document.addEventListener(e,()=>{const b=document.getElementById('grc-timeout-warning');if(b)b.style.display='none';reset();},true);});
+  reset();
 })();
 </script>
-
-<!-- TIMEOUT WARNING BANNER -->
 <div id="grc-timeout-warning" style="display:none;position:fixed;bottom:20px;right:20px;z-index:9998;background:#1a1e28;border:1px solid rgba(245,158,11,.4);border-radius:8px;padding:14px 18px;font-family:'Space Mono',monospace;align-items:center;gap:12px;box-shadow:0 4px 20px rgba(0,0,0,.4);">
-  <span style="font-size:10px;color:var(--amber);">⚠ Session expiring in 1 minute</span>
-  <button onclick="document.getElementById('grc-timeout-warning').style.display='none'" style="font-size:7px;padding:4px 10px;border-radius:4px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.1);color:var(--amber);cursor:pointer;font-family:'Space Mono',monospace;">Stay Logged In</button>
+  <span style="font-size:10px;color:#f59e0b;">⚠ Session expiring in 1 minute</span>
+  <button onclick="document.getElementById('grc-timeout-warning').style.display='none'" style="font-size:7px;padding:4px 10px;border-radius:4px;border:1px solid rgba(245,158,11,.3);background:rgba(245,158,11,.1);color:#f59e0b;cursor:pointer;font-family:'Space Mono',monospace;">Stay Logged In</button>
 </div>
 </body>
 </html>
