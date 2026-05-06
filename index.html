@@ -6459,12 +6459,12 @@ async function outSendNow(id){
 /* ── TEMPLATES ── */
 async function outLoadTemplatesFromServer(){
   const res=await apiCall('GET','/templates');
-  if(res.success&&res.templates&&res.templates.length){
-    outTemplates=res.templates.map(t=>({
-      id:t.id,day:t.day,step:t.step,
+  const templates=Array.isArray(res)?res:(res?.templates||[]);
+  if(templates.length){
+    outTemplates=templates.map(t=>({
+      id:t.id,day:t.day||t.step,step:t.step||t.day,
       title:t.title,subject:t.subject,body:t.body
     }));
-    if(res.signature)outSettings.signature=res.signature;
     outSave();
   }
 }
@@ -6518,19 +6518,23 @@ function outRenderTemplates(){
 
 async function outSaveTpl(id){
   const tpl=outTemplates.find(t=>t.id===id);if(!tpl)return;
-  tpl.subject=document.getElementById('tpl-subj-'+id).value;
-  tpl.body=document.getElementById('tpl-body-'+id).value;
-  tpl.title=tpl.title;
+  tpl.subject=document.getElementById('tpl-subj-'+id)?.value||tpl.subject;
+  tpl.body=document.getElementById('tpl-body-'+id)?.value||tpl.body;
   const btn=document.querySelector(`button[onclick="outSaveTpl('${id}')"]`);
   if(btn){btn.textContent='⏳ Saving...';btn.disabled=true;}
-  const res=await apiCall('PUT','/templates/'+id,{subject:tpl.subject,body:tpl.body,title:tpl.title});
-  if(res.success){
-    outSave();
-    if(btn){btn.textContent='✓ Saved!';setTimeout(()=>{btn.textContent='💾 Save to Server';btn.disabled=false;},2000);}
-    outLog('✏️',`Template <strong>Email ${id.replace('t','')}</strong> updated and saved to server`);
-  } else {
+  try{
+    const res=await apiCall('PUT','/templates/'+id,{subject:tpl.subject,body:tpl.body,title:tpl.title});
+    if(res&&res.success){
+      outSave();
+      if(btn){btn.textContent='✓ Saved!';setTimeout(()=>{btn.textContent='💾 Save to Server';btn.disabled=false;},2000);}
+      outLog('✏️',`Template <strong>Email ${id.replace('t','')}</strong> updated and saved to server`);
+    } else {
+      if(btn){btn.textContent='✗ Error — retry';btn.disabled=false;}
+      alert('Save failed: '+(res?.error||'Unknown error'));
+    }
+  }catch(e){
     if(btn){btn.textContent='✗ Error — retry';btn.disabled=false;}
-    alert('Save failed: '+res.error);
+    alert('Error: '+e.message);
   }
 }
 
