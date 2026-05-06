@@ -2774,6 +2774,25 @@ function switchOutreach(id, btn) {
   reset();
 })();
 </script>
+
+<!-- SENDER SELECTION MODAL -->
+<div id="brk-camp-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;align-items:center;justify-content:center;">
+  <div style="background:var(--s1);border:1px solid var(--gold-mid);border-radius:var(--r-lg);padding:28px;width:380px;text-align:center;">
+    <div style="font-family:'Cinzel',serif;font-size:16px;color:var(--gold);margin-bottom:6px;">Add to Campaign</div>
+    <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:20px;">Who is sending the emails to <strong id="brk-camp-name" style="color:var(--paper);"></strong>?</div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-bottom:16px;">
+      <button onclick="brkCampConfirm('gabriel')" style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;padding:14px 24px;border-radius:var(--r);border:1px solid var(--gold-mid);background:var(--gold-lt);color:var(--gold);cursor:pointer;flex:1;">
+        <div>Gabriel Vazquez</div>
+        <div style="font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:4px;">gabriel.vazquez@genrealcapital.com</div>
+      </button>
+      <button onclick="brkCampConfirm('javier')" style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;padding:14px 24px;border-radius:var(--r);border:1px solid var(--line);background:var(--s2);color:var(--paper);cursor:pointer;flex:1;">
+        <div>Javier Rojas</div>
+        <div style="font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:4px;">javier.rojas@genrealcapital.com</div>
+      </button>
+    </div>
+    <button onclick="document.getElementById('brk-camp-modal').style.display='none'" style="font-family:'Space Mono',monospace;font-size:8px;padding:6px 16px;border-radius:var(--r);border:1px solid var(--line);background:var(--s2);color:var(--muted);cursor:pointer;">Cancel</button>
+  </div>
+</div>
 </body>
 </html>
 "
@@ -3825,20 +3844,35 @@ function toggleMonitor(email){
 
 function brkToCampaign(name, email, firm, market){
   if(!email){alert('This broker has no email address.');return;}
-  if(typeof outCampaign==='undefined'){alert('Please go to Broker Outreach first to initialize the campaign.');return;}
+  if(typeof outCampaign==='undefined'){alert('Please go to Broker Outreach first.');return;}
   var exists=outCampaign.find(function(b){return b.email&&b.email.toLowerCase()===email.toLowerCase();});
   if(exists){alert(name+' is already in the Outreach Campaign.');return;}
+  // Show sender selection modal
+  document.getElementById('brk-camp-name').textContent=name;
+  document.getElementById('brk-camp-modal').style.display='flex';
+  document.getElementById('brk-camp-modal').dataset.name=name;
+  document.getElementById('brk-camp-modal').dataset.email=email;
+  document.getElementById('brk-camp-modal').dataset.firm=firm||'';
+  document.getElementById('brk-camp-modal').dataset.market=(market||'FL').toUpperCase();
+}
+
+function brkCampConfirm(sender){
+  var modal=document.getElementById('brk-camp-modal');
+  var name=modal.dataset.name;
+  var email=modal.dataset.email;
+  var firm=modal.dataset.firm;
+  var market=modal.dataset.market;
+  modal.style.display='none';
   outCampaign.push({
     id:'oc_'+Date.now(), name:name, email:email,
-    firm:firm||'', market:(market||'fl').toUpperCase(),
-    sender:'gabriel', notes:'', status:'active',
-    currentStep:1, replied:false,
+    firm:firm, market:market, sender:sender,
+    notes:'', status:'active', currentStep:1, replied:false,
     lastSentDate:null, nextSendDate:new Date().toISOString(),
     addedDate:new Date().toISOString()
   });
   if(typeof outSaveCampaign==='function') outSaveCampaign();
-  else if(typeof outSave==='function') outSave();
-  alert('✓ '+name+' added to Broker Outreach Campaign!');
+  if(typeof outRenderDashboard==='function') outRenderDashboard();
+  alert('✓ '+name+' added to campaign!\nSending from: '+(sender==='javier'?'Javier Rojas':'Gabriel Vazquez'));
 }
 
 function renderBrokers(){
@@ -5698,7 +5732,85 @@ function biAddToDir(id){
 }
 
 
+/* ══ RENDER DATABASE SYNC ══ */
+const RENDER_API = 'https://grc-outreach-system-nkzp.onrender.com';
+
+async function apiCall(method, path, data){
+  try{
+    var opts={method:method,headers:{'Content-Type':'application/json'}};
+    if(data&&method!=='GET')opts.body=JSON.stringify(data);
+    var res=await fetch(RENDER_API+path,opts);
+    return await res.json();
+  }catch(e){return null;}
+}
+
+async function syncLoad(){
+  try{
+    // Load broker directory
+    var dirs=await apiCall('GET','/directory');
+    if(dirs&&Array.isArray(dirs)&&dirs.length){
+      dirs.forEach(function(b){
+        var exists=customBrokers.find(function(c){return c.email&&b.email&&c.email.toLowerCase()===b.email.toLowerCase();});
+        if(!exists)customBrokers.push({id:b.id,name:b.name,email:b.email,firm:b.firm||'',firmCat:b.firm_cat||'other',phone:b.phone||'',specialty:b.specialty||'',mkts:b.markets||[],markets:b.markets||[],monitored:b.monitored!==false,source:'custom'});
+      });
+      localStorage.setItem('grc-v2-brokers',JSON.stringify(customBrokers));
+      renderBrokers();
+    }
+    // Load deals
+    var deals=await apiCall('GET','/deals');
+    if(deals&&Array.isArray(deals)&&deals.length){
+      deals.forEach(function(d){
+        var exists=dtDeals.find(function(x){return x.id===d.id;});
+        if(!exists)dtDeals.push({id:d.id,propName:d.name,address:d.address,market:d.market,units:d.units,askPrice:d.price,ppu:d.price_per_unit,yrBuilt:d.year_built,goingInCap:d.cap_rate,status:d.status,cls:d.asset_class,broker:d.broker_name,brokerEmail:d.broker_email,notes:d.notes});
+      });
+      localStorage.setItem('grc-v2-dt',JSON.stringify(dtDeals));
+      dtRenderDashboard();
+    }
+    // Load comps
+    var compsData=await apiCall('GET','/comps');
+    if(compsData&&Array.isArray(compsData)&&compsData.length){
+      compsData.forEach(function(c){
+        var exists=comps.find(function(x){return x.id===c.id;});
+        if(!exists)comps.push({id:c.id,name:c.property_name,address:c.address,market:c.market,units:c.units,price:c.sale_price,ppu:c.price_per_unit,cap:c.cap_rate,yr:c.year_built,date:c.sale_date,notes:c.notes});
+      });
+      localStorage.setItem('grc-v2-comps',JSON.stringify(comps));
+      renderComps();
+    }
+    console.log('✓ Synced from Render database');
+  }catch(e){console.log('Sync failed:',e.message);}
+}
+
+// Hook into save functions to also save to server
+var _origSaveBrokers=saveBrokers;
+saveBrokers=function(){
+  _origSaveBrokers();
+  customBrokers.forEach(function(b){
+    if(!b.deleted)apiCall('POST','/directory',{id:b.id,name:b.name,email:b.email||'',firm:b.firm||'',firmCat:b.firmCat||'other',phone:b.phone||'',specialty:b.specialty||'',markets:b.mkts||[],monitored:b.monitored!==false}).catch(function(){});
+  });
+};
+
+var _origDtSave=dtSave;
+dtSave=function(){
+  _origDtSave();
+  dtDeals.forEach(function(d){
+    apiCall('POST','/deals',{id:d.id,name:d.propName||'',address:d.address||'',market:d.market||'FL',units:d.units||0,price:d.askPrice||0,pricePerUnit:d.ppu||0,yearBuilt:d.yrBuilt||0,capRate:d.goingInCap||0,status:d.status||'screening',assetClass:d.cls||'B',brokerName:d.broker||'',brokerEmail:d.brokerEmail||'',notes:d.notes||''}).catch(function(){});
+  });
+};
+
+var _origSaveComps=saveComps;
+saveComps=function(){
+  _origSaveComps();
+  comps.forEach(function(c){
+    apiCall('POST','/comps',{id:c.id,propertyName:c.name||'',address:c.address||'',market:c.market||'FL',units:c.units||0,salePrice:c.price||0,pricePerUnit:c.ppu||0,capRate:c.cap||0,yearBuilt:c.yr||0,saleDate:c.date||null,notes:c.notes||''}).catch(function(){});
+  });
+};
+
+// Auto sync every 60 seconds
+setInterval(syncLoad, 60000);
+
+
 biRenderCards();
+syncLoad().catch(function(){});
 </script>
 
 <script>
@@ -5720,5 +5832,24 @@ biRenderCards();
   reset();
 })();
 </script>
+
+<!-- SENDER SELECTION MODAL -->
+<div id="brk-camp-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2000;align-items:center;justify-content:center;">
+  <div style="background:var(--s1);border:1px solid var(--gold-mid);border-radius:var(--r-lg);padding:28px;width:380px;text-align:center;">
+    <div style="font-family:'Cinzel',serif;font-size:16px;color:var(--gold);margin-bottom:6px;">Add to Campaign</div>
+    <div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--muted);margin-bottom:20px;">Who is sending the emails to <strong id="brk-camp-name" style="color:var(--paper);"></strong>?</div>
+    <div style="display:flex;gap:10px;justify-content:center;margin-bottom:16px;">
+      <button onclick="brkCampConfirm('gabriel')" style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;padding:14px 24px;border-radius:var(--r);border:1px solid var(--gold-mid);background:var(--gold-lt);color:var(--gold);cursor:pointer;flex:1;">
+        <div>Gabriel Vazquez</div>
+        <div style="font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:4px;">gabriel.vazquez@genrealcapital.com</div>
+      </button>
+      <button onclick="brkCampConfirm('javier')" style="font-family:'Cinzel',serif;font-size:13px;font-weight:700;padding:14px 24px;border-radius:var(--r);border:1px solid var(--line);background:var(--s2);color:var(--paper);cursor:pointer;flex:1;">
+        <div>Javier Rojas</div>
+        <div style="font-family:'Space Mono',monospace;font-size:7px;color:var(--muted);margin-top:4px;">javier.rojas@genrealcapital.com</div>
+      </button>
+    </div>
+    <button onclick="document.getElementById('brk-camp-modal').style.display='none'" style="font-family:'Space Mono',monospace;font-size:8px;padding:6px 16px;border-radius:var(--r);border:1px solid var(--line);background:var(--s2);color:var(--muted);cursor:pointer;">Cancel</button>
+  </div>
+</div>
 </body>
 </html>
