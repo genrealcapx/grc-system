@@ -6440,7 +6440,7 @@ async function outSendNow(id){
       if(b.currentStep>=4){b.status='completed';b.nextSendDate=null;}
       else{
         b.currentStep++;
-        const gaps={2:7,3:14,4:24};
+        const gaps={2:3,3:7,4:14};
         const nextDate=new Date();nextDate.setDate(nextDate.getDate()+(gaps[b.currentStep]||7));
         b.nextSendDate=nextDate.toISOString();
       }
