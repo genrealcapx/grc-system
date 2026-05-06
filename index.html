@@ -5625,6 +5625,79 @@ function outInit(){
 }
 
 
+const BI_DOSSIERS=[
+  {id:'troop',email:'ctroop@berkadia.com',name:'Caleb Troop',role:'Managing Director · Berkadia Charlotte',statusLabel:'✓ Active',volume:'$5B+ Career · $1.5B NC/SC (2024)',markets:'Charlotte · Raleigh · Charleston · Columbia · Greenville · Myrtle Beach',tags:['Class B/C','Value-Add','Garden Style','CoStar Power Broker'],outreachAngle:'Garden-style Class B/C specialist in the Carolinas.'},
+  {id:'hague',email:'jason.hague@marcusmillichap.com',name:'Jason Hague',role:'Senior VP · RPH Group · Marcus & Millichap',statusLabel:'✓ Active',volume:'$1B+ MF Sales · CoStar Power Broker',markets:'Tampa Bay · Central FL · Eastern FL',tags:['Class B/C','Garden Style','FL Specialist'],outreachAngle:'Tampa Bay garden-style 50-150 unit specialist.'},
+  {id:'roberts',email:'ned.roberts@marcusmillichap.com',name:'Ned Roberts, CCIM',role:'Senior VP · RPH Group · Marcus & Millichap',statusLabel:'✓ Active',volume:'$1B+ · CCIM · CoStar Power Broker',markets:'Tampa Bay · Central FL · Tallahassee',tags:['CCIM','Class B/C','Garden Style'],outreachAngle:'CCIM Power Broker. 50-200 unit garden style specialist.'},
+  {id:'skinner',email:'benjamin.skinner@marcusmillichap.com',name:'Benjamin Skinner',role:'Associate Director · SP Group · Marcus & Millichap',statusLabel:'✓ Active',volume:'$4B+ Career Volume',markets:'Central FL · Jacksonville · Tampa',tags:['Class B/C','Central FL','Jacksonville'],outreachAngle:'SP Group covers Central FL and Jacksonville.'},
+];
+
+function biMainTab(tab){
+  var isReport=tab==='report';
+  var pr=document.getElementById('bi-panel-report');
+  var pd=document.getElementById('bi-panel-dossier');
+  var r=document.getElementById('bi-tab-report');
+  var d=document.getElementById('bi-tab-dossier');
+  if(pr)pr.style.display=isReport?'block':'none';
+  if(pd)pd.style.display=isReport?'none':'block';
+  if(r){r.style.borderBottomColor=isReport?'var(--gold)':'transparent';r.style.color=isReport?'var(--gold)':'var(--muted)';}
+  if(d){d.style.borderBottomColor=isReport?'transparent':'var(--gold)';d.style.color=isReport?'var(--muted)':'var(--gold)';}
+  if(!isReport)biRenderCards();
+}
+
+function biRenderCards(){
+  var grid=document.getElementById('bi-cards-grid');
+  if(!grid)return;
+  var html='';
+  for(var i=0;i<BI_DOSSIERS.length;i++){
+    var d=BI_DOSSIERS[i];
+    var tags='';
+    for(var j=0;j<d.tags.length;j++){
+      tags+='<span style="font-size:7px;padding:2px 6px;border-radius:2px;background:var(--s2);color:var(--muted);border:1px solid var(--line);">'+d.tags[j]+'</span> ';
+    }
+    var card='<div style="background:var(--s1);border:1px solid var(--line);border-radius:var(--r-lg);padding:16px;">';
+    card+='<div style="display:flex;justify-content:space-between;margin-bottom:10px;">';
+    card+='<div><div style="font-family:Cinzel,serif;font-size:15px;font-weight:700;color:var(--paper);">'+d.name+'</div>';
+    card+='<div style="font-size:8px;color:var(--gold);">'+d.role+'</div></div>';
+    card+='<span style="font-size:7px;padding:3px 8px;background:rgba(34,197,94,.1);color:var(--green);border-radius:2px;">'+d.statusLabel+'</span></div>';
+    card+='<div style="font-size:10px;color:var(--muted);margin-bottom:4px;">'+d.volume+'</div>';
+    card+='<div style="font-size:10px;color:var(--muted);margin-bottom:10px;">'+d.markets+'</div>';
+    card+='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px;">'+tags+'</div>';
+    if(d.email){
+      card+='<div style="display:flex;align-items:center;gap:6px;padding-top:10px;border-top:1px solid var(--line);">';
+      card+='<span style="font-size:8px;color:var(--muted);flex:1;overflow:hidden;text-overflow:ellipsis;">'+d.email+'</span>';
+      card+='<button data-bid="'+d.id+'" class="bi-dir-btn" style="font-size:7px;font-weight:700;padding:4px 10px;border-radius:2px;border:1px solid rgba(34,197,94,.4);background:rgba(34,197,94,.1);color:var(--green);cursor:pointer;">+ Directory</button>';
+      card+='<button data-bname="'+d.name+'" data-bemail="'+d.email+'" class="bi-camp-btn" style="font-size:7px;font-weight:700;padding:4px 10px;border-radius:2px;border:1px solid var(--gold-mid);background:var(--gold-lt);color:var(--gold);cursor:pointer;">+ Campaign</button>';
+      card+='</div>';
+    }
+    card+='</div>';
+    html+=card;
+  }
+  grid.innerHTML=html;
+  // Attach click handlers
+  grid.querySelectorAll('.bi-dir-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){biAddToDir(this.getAttribute('data-bid'));});
+  });
+  grid.querySelectorAll('.bi-camp-btn').forEach(function(btn){
+    btn.addEventListener('click',function(){brkToCampaign(this.getAttribute('data-bname'),this.getAttribute('data-bemail'),'','FL');});
+  });
+}
+
+
+function biAddToDir(id){
+  var d=BI_DOSSIERS.find(function(x){return x.id===id;});
+  if(!d||!d.email)return;
+  var all=getAllBrokers();
+  if(all.find(function(b){return b.email&&b.email.toLowerCase()===d.email.toLowerCase();})){alert(d.name+' already in Broker Directory.');return;}
+  var em=d.email.toLowerCase();
+  var mkts=em.includes('berkadia')?['nc','sc']:['fl'];
+  var firm=em.includes('marcusmillichap')?'Marcus & Millichap':em.includes('berkadia')?'Berkadia':'Unknown';
+  customBrokers.push({id:'bi_'+Date.now(),name:d.name,email:d.email,firm:firm,firmCat:'other',phone:'',specialty:d.outreachAngle||'',mkts:mkts,markets:mkts.map(function(m){return m.toUpperCase();}),monitored:true,source:'custom'});
+  saveBrokers();
+  alert('✓ '+d.name+' added to Broker Directory!');
+}
+
+
 biRenderCards();
 </script>
 
