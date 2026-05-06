@@ -6414,40 +6414,28 @@ function outPreviewNext(id){
 /* ── SEND NOW (simulation — real send goes through Render server) ── */
 async function outSendNow(id){
   const b=outCampaign.find(x=>x.id===id);
-  if(!b){alert('Broker not found in campaign. Please re-add the broker.');return;}
+  if(!b){alert('Broker not found. Please add the broker to campaign first.');return;}
   if(b.status==='replied'||b.status==='completed'){alert('This broker has already replied or completed the sequence.');return;}
 
   const btn=document.querySelector(`button[onclick="outSendNow('${id}')"]`);
   if(btn){btn.textContent='⏳ Sending...';btn.disabled=true;}
 
   try{
-    // Save broker to server with correct format matching database schema
-    const saveRes = await apiCall('POST','/brokers',{
-      id: b.id,
-      name: b.name,
-      email: b.email,
-      firm: b.firm||'',
-      market: b.market||'FL',
-      sender: b.sender||'gabriel',
-      status: 'active',
-      currentStep: b.currentStep||1,
-      nextSendDate: new Date().toISOString(),
-      notes: b.notes||''
+    // Send directly with broker data — no pre-save needed
+    const res = await fetch(RENDER_API+'/send-direct', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        name: b.name,
+        email: b.email,
+        sender: b.sender||'gabriel',
+        step: b.currentStep||1
+      })
     });
+    const data = await res.json();
 
-    if(!saveRes){
-      throw new Error('Could not save broker to server');
-    }
-
-    // Small delay to ensure save completes
-    await new Promise(r=>setTimeout(r,500));
-
-    // Trigger send
-    const res=await apiCall('POST','/send-now',{brokerId:b.id});
-
-    if(res&&res.success){
-      const senderEmail=b.sender==='javier'?outSettings.javierEmail:outSettings.gabrielEmail;
-      outLog('📧',`Email ${b.currentStep} sent to <strong>${b.name}</strong> &lt;${b.email}&gt; from ${senderEmail} ✓`);
+    if(data.success){
+      outLog('📧',`Email ${b.currentStep} sent to <strong>${b.name}</strong> &lt;${b.email}&gt; ✓`);
       b.lastSentDate=new Date().toISOString();
       if(b.currentStep>=4){b.status='completed';b.nextSendDate=null;}
       else{
@@ -6458,15 +6446,14 @@ async function outSendNow(id){
       }
       outSave();outRenderDashboard();
       if(btn){btn.textContent='✓ Sent!';setTimeout(()=>{btn.textContent='▶ Send Now';btn.disabled=false;},3000);}
-      alert('✓ Email sent successfully!\n\nCheck your Outlook Sent folder to confirm.');
+      alert('✓ Email sent!\n\nCheck your Outlook Sent folder.');
     } else {
-      const errMsg=res?.error||'Unknown error';
       if(btn){btn.textContent='▶ Send Now';btn.disabled=false;}
-      alert('Send failed: '+errMsg+'\n\nCheck Render logs for details.');
+      alert('Send failed: '+(data.error||'Unknown error'));
     }
   }catch(err){
     if(btn){btn.textContent='▶ Send Now';btn.disabled=false;}
-    alert('Error: '+err.message);
+    alert('Connection error: '+err.message);
   }
 }
 /* ── TEMPLATES ── */
